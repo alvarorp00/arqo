@@ -44,14 +44,8 @@ begin
       if Reset = '1' then
          for i in 0 to 31 loop
             regs(i) <= (others => '0');
-         end loop;
+         end loop;  
       elsif falling_edge(Clk) then
-            ------------------------------------------------------
-            -- Lectura de registros
-            ------------------------------------------------------
-            Rd1 <= regs(conv_integer(A1));
-            Rd2 <= regs(conv_integer(A2));
-      elsif rising_edge(Clk) then
          if We3 = '1' then
             if A3 /= "00000" then -- El R0 siempre es cero
                regs(conv_integer(A3)) <= Wd3;
@@ -60,7 +54,11 @@ begin
       end if;
    end process;
 
-   
+   ------------------------------------------------------
+   -- Lectura de registros
+   ------------------------------------------------------
+   Rd1 <= regs(conv_integer(A1));
+   Rd2 <= regs(conv_integer(A2));
 
 end architecture;
 
