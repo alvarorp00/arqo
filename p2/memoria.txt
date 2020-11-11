@@ -1,0 +1,16 @@
+Autores:
+	Javier Romera Llave - javier.romeral@estudiante.uam.es
+	Álvaro Rodríguez Palacios - alvaro.rodriguezp@estudiante.uam.es
+
+
+Comentarios sobre la práctica:
+
+	Ejercicio 1:
+		
+		> Tomamos la decisión de que el banco de registros funcionase en flanco de bajada, cambiando la
+		instrucción rising_edge() por falling_edge(), que sería el equivalente de sustituir clk'event and clk por
+		clk'event and clk = '0', y ya que funcionan síncronamente, y puesto que las señales que vienen del "write-back", de vuelta,
+		también lo son (pero en flanco de subida), va a permitir hacerlo.
+
+		Así, en flanco de subida se va a leer el registro, y en flanco de bajada se va a escribir, 
+		ya que no se puede acceder simultáneamente al banco de registros.
