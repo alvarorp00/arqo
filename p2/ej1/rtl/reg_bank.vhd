@@ -46,7 +46,11 @@ begin
             regs(i) <= (others => '0');
          end loop;
       elsif falling_edge(Clk) then
-            -- pass
+            ------------------------------------------------------
+            -- Lectura de registros
+            ------------------------------------------------------
+            Rd1 <= regs(conv_integer(A1));
+            Rd2 <= regs(conv_integer(A2));
       elsif rising_edge(Clk) then
          if We3 = '1' then
             if A3 /= "00000" then -- El R0 siempre es cero
@@ -56,11 +60,7 @@ begin
       end if;
    end process;
 
-   ------------------------------------------------------
-            -- Lectura de registros
-            ------------------------------------------------------
-            Rd1 <= regs(conv_integer(A1));
-            Rd2 <= regs(conv_integer(A2));
+   
 
 end architecture;
 
