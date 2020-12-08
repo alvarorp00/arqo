@@ -1,0 +1,87 @@
+#!/bin/bash
+
+source .src
+
+pair=7
+P=$(( pair % 7 + 4 ))
+stepN=64
+fromN=$(( 10000 + 1024*P ))
+toN=$(( 10000 + 1024*(P+1) ))
+nLoops=10
+fDAT=slow_fast_time.dat
+fPNG=slow_fast_time.png
+
+info "P = $P\n"
+info "fromN = $fromN\n"
+info "stepN = $stepN\n"
+info "nLoops = $nLoops\n"
+info "toN = $toN\n"
+
+plotall() {
+
+  echo "Generating plot..."
+
+# llamar a gnuplot para generar el gráfico y pasarle directamente por la entrada
+# estándar el script que está entre "<< END_GNUPLOT" y "END_GNUPLOT"
+gnuplot << END_GNUPLOT
+set title "Slow-Fast Execution Time"
+set ylabel "Execution time (s)"
+set xlabel "Matrix Size"
+set key right bottom
+set grid
+set term png
+set output "$fPNG"
+plot "$fDAT" using 1:2 with lines lw 2 title "slow", \
+     "$fDAT" using 1:3 with lines lw 2 title "fast"
+replot
+quit
+END_GNUPLOT
+
+}
+
+if [ ! -e $fDAT ]; then
+
+  touch $fDAT 
+
+  info "running slow and fast ...\n"
+
+  # bucle para N desde P hasta Q 
+  #for N in $(seq $Ninicio $Npaso $Nfinal);
+  for ((N = fromN ; N <= toN ; N += stepN)); do
+
+    info "testing N [$N,$toN] ...\n"
+
+    # ejecutar los programas slow y fast consecutivamente con tamaño de matriz N
+    # para cada uno, filtrar la línea que contiene el tiempo y seleccionar la
+    # tercera columna (el valor del tiempo). Dejar los valores en variables
+    # para poder imprimirlos en la misma línea del fichero de datos
+
+    slowSum="0"
+    fastSum="0"
+
+    for (( i=0 ; i < $nLoops; i +=1 )); do
+      echo -n "loop=$i; slow@$N: "
+      slowTime=$(./slow $N | grep 'time' | awk '{print $3}')
+      echo "${slowTime}s"
+      echo -n "loop=$i; fast@$N: "
+      fastTime=$(./fast $N | grep 'time' | awk '{print $3}')
+      echo "${fastTime}s"
+      slowSum=$(calc "$slowSum+$slowTime")
+      fastSum=$(calc "$fastSum+$fastTime")
+    done
+
+  slowTime=$(calc "$slowSum/$nLoops")
+  fastTime=$(calc "$fastSum/$nLoops")
+
+  info "slowTimeAvg: $slowTime\n"
+  info "fastTimeAvg: $fastTime\n"
+
+	echo "$N	$slowTime	$fastTime" >> $fDAT
+
+  done
+fi
+
+plotall
+
+success "done\n"
+

@@ -1,0 +1,117 @@
+#!/bin/bash
+
+source .src
+
+stepN=64
+fromN=$(( 2000 + 512*P ))
+toN=$(( 2000 + 512*(P+1) ))
+nLoops=10
+
+info "P = $P\n"
+info "fromN = $fromN\n"
+info "stepN = $stepN\n"
+info "nLoops = $nLoops\n"
+info "toN = $toN\n"
+
+plotall() {
+
+  echo "Generating plot..."
+
+gnuplot << END_GNUPLOT
+set title "Data Cache - Reading misses"
+set ylabel "Misses"
+set encoding utf8
+set xlabel "Matrix Size"
+set key right bottom
+set grid
+set term png
+set output "cache_lectura.png"
+plot  "cache_1024.dat" using 1:2 with lines lc "red" lw 2 dashtype 0 title 'slow\@1024', \
+      "cache_1024.dat" using 1:4 with lines lc "red" lw 2 dashtype 1 title 'fast\@1024', \
+      "cache_2048.dat" using 1:2 with lines lc "blue" lw 2 dashtype 0 title 'slow\@2048', \
+      "cache_2048.dat" using 1:4 with lines lc "blue" lw 2 dashtype 1 title 'fast\@2048', \
+      "cache_4096.dat" using 1:2 with lines lc "green" lw 2 dashtype 0 title 'slow\@4096', \
+      "cache_4096.dat" using 1:4 with lines lc "green" lw 2 dashtype 1 title 'fast\@4096', \
+      "cache_8192.dat" using 1:2 with lines lc "orange" lw 2 dashtype 0 title 'slow\@8192', \
+      "cache_8192.dat" using 1:4 with lines lc "orange" lw 2 dashtype 1 title 'fast\@8192'
+
+set output "cache_escritura.png"
+set title "Data Cache - Writing misses"
+plot  "cache_1024.dat" using 1:3 with lines lc "red" lw 2 dashtype 0 title 'slow\@1024', \
+      "cache_1024.dat" using 1:5 with lines lc "red" lw 2 dashtype 1 title 'fast\@1024', \
+      "cache_2048.dat" using 1:3 with lines lc "blue" lw 2 dashtype 0 title 'slow\@2048', \
+      "cache_2048.dat" using 1:5 with lines lc "blue" lw 2 dashtype 1 title 'fast\@2048', \
+      "cache_4096.dat" using 1:3 with lines lc "green" lw 2 dashtype 0 title 'slow\@4096', \
+      "cache_4096.dat" using 1:5 with lines lc "green" lw 2 dashtype 1 title 'fast\@4096', \
+      "cache_8192.dat" using 1:3 with lines lc "orange" lw 2 dashtype 0 title 'slow\@8192', \
+      "cache_8192.dat" using 1:5 with lines lc "orange" lw 2 dashtype 1 title 'fast\@8192'
+
+replot
+quit
+END_GNUPLOT
+
+}
+
+blockSize=64 # cache line size
+cacheSizes=(1024 2048 4096 8192) # different cache sizes to be tested
+
+cache_name() {
+  echo "cache_$1.dat"
+}
+
+get_D1mr() {
+  cg_annotate $1 | sed -n '18p' | awk '{print $5}' | tr -d ','
+}
+
+get_D1mw() {
+  cg_annotate $1 | sed -n '18p' | awk '{print $8}' | tr -d ','
+}
+
+test_cache() { # <exe> <N> <cache_size> <block_size> <out_file>
+  info "testing cache $1@$2 | $3,1,$4 > $5 ...\n"
+  valgrind --tool=cachegrind \
+    --I1=$3,1,$4 \
+    --D1=$3,1,$4 \
+    --LL=$((8*1024*1024)),1,$4 \
+    --cachegrind-out-file=$5 \
+    $1 $2
+}
+
+
+if [ ! -e $(cache_name ${cacheSizes[0]}) ]; then
+
+  info "running valgrind tests ...\n"
+
+  info "cleaning .dat files ...\n"
+  for size in ${cacheSizes[@]}; do
+    rm -f $(cache_name $size)
+  done
+
+  for ((N = fromN ; N <= toN ; N += stepN)); do
+
+    info "testing N [$N,$toN] ...\n"
+
+    for size in ${cacheSizes[@]}; do
+
+      slowName="cachegrind.slow.$size"
+      fastName="cachegrind.fast.$size"
+
+      test_cache ./slow $N $size $blockSize $slowName
+      test_cache ./fast $N $size $blockSize $fastName
+
+      slowD1mr=$(get_D1mr $slowName)
+      slowD1mw=$(get_D1mw $slowName)
+      fastD1mr=$(get_D1mr $fastName)
+      fastD1mw=$(get_D1mw $fastName)
+
+      echo "$N $slowD1mr $slowD1mw $fastD1mr $fastD1mw" >> $(cache_name $size)
+
+    done
+
+  done
+
+fi
+
+info "plotting ...\n"
+plotall
+success "done\n"
