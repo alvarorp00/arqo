@@ -55,7 +55,7 @@ En el equipo propio en que estamos desarrollando la práctica - localmente, seg�
 
 > 1.3 Modifique el programa omp1.c para utilizar las tres formas de elegir el número de threads y deduzca la prioridad entre ellas
 
-Tal y como hemos podido ver, la variable de entorno _OMP_NUM_THREADS_ sólo se usa en el valor de _nthreads_ que hay dentro de la región paralela, no trascendiendo fuera de ese bloque; siendo la función _omp_set_num_threads(any)_ la que cambia el vaor de la variable _nthreads_ en todo momento - dentro y fuera de las regiones paralelas.
+Tal y como hemos podido ver, la variable de entorno _OMP_NUM_THREADS_ sólo se usa en el valor de _nthreads_ que hay dentro de la región paralela, no trascendiendo fuera de ese bloque; siendo la función _omp_set_num_threads(any)_ la que cambia el valor de la variable _nthreads_ en todo momento - dentro y fuera de las regiones paralelas.
 
 Por otro lado, tenemos la cláusula _num_threads(any)_ en la línea de la directiva `#pragma`, cuyo orden de precedencia es mayor que los anteriores, quedando la prioridad de las 3 clásulas definidas como sigue:
 
@@ -84,7 +84,7 @@ Tal y como hemos expuesto en el apartado anterior, el valor de la variable priva
 
 > 1.7 ¿Ocurre lo mismo con las variables públicas?
 
-No, ya que estas se comportan como una variable 'normal', toda modificación que sufra antes, durante y después de la/las región/es paralela(s) se conservará para el/los siguiente/siguientes bloques de código.
+No, ya que estas se comportan como una variable 'normal', toda modificación que sufra antes, durante y después de la/las región/es paralela(s) se conservará para el/los siguiente(s) bloque(s) de código.
 
 
 ## Ejercicio 2 - Paralelizar el producto escalar
@@ -182,6 +182,17 @@ x--
 --x
 ```
 
+Para solucionar esto, hay que reescribir la siguiente expresión:
+
+`sum = sum + A[k]*B[k];` --> `sum += A[k]*B[k];`
+
+Siendo el resultado el siguiente:
+
+```
+Resultado: 10000.000000
+Tiempo: 0.001886
+```
+
 Otra posible solución sería declarando la directiva #pragma como sigue:
 
 ```
@@ -197,4 +208,6 @@ Tiempo: 0.000110
 
 Aquí, vemos que hemos usado la cláusula `reduction`, específica para regiones paralelas de compartición de datos, que tiene que ser usada junto con `parallel for`.
 
-Sin embargo, nos limitamos al enunciado y dejamos puesta la directiva `#pragma omp critical` en el fichero **pescalar_par2.c**.
+Sin embargo, nos limitamos al enunciado y dejamos puesta la directiva `#pragma omp atomic` en el fichero **pescalar_par2.c**.
+
+Hemos elegido `atomic` antes que `critical` por una razón, y es que, como se puede ver en la referencia que hemos dejado arriba, `atomic` hace referencia a un acceso a una parte concreta de memoria, mientras que `critical` se refiere a un bloque entero (ver [omp critical](https://scc.ustc.edu.cn/zlsc/tc4600/intel/2015.1.133/compiler_c/GUID-0C42D422-7CF5-44A7-AC12-43DF3CBD65A1.htm)); siendo más precisa la solución con `atomic` en este caso, pese a que tenga que modificarse la expresión.
