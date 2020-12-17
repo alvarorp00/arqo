@@ -193,7 +193,20 @@ Resultado: 10000.000000
 Tiempo: 0.001886
 ```
 
-Otra posible solución sería declarando la directiva #pragma como sigue:
+Estas dos soluciones requieren poner la directiva en la línea anterior a la operación, dentro del bucle _for_.
+
+Hemos elegido `atomic` antes que `critical` por una razón, y es que, como se puede ver en la referencia que hemos dejado arriba, `atomic` hace referencia a un acceso a una parte concreta de memoria, mientras que `critical` se refiere a un bloque entero (ver [omp critical](https://scc.ustc.edu.cn/zlsc/tc4600/intel/2015.1.133/compiler_c/GUID-0C42D422-7CF5-44A7-AC12-43DF3CBD65A1.htm)); siendo más precisa la solución con `atomic` en este caso, pese a que tenga que modificarse la expresión.
+
+La idea aquí de `#pragma omp atomic` es similar a la de los tipos `atomic` en **C** (ver [Atomics](http://scc-forge.lancaster.ac.uk/open/char/threads/atomic))
+
+> 2.4 Modifique el código anterior y denomine el programa resultante pescalar_par3. Esta versión debe dar el
+> resultado correcto utilizando donde corresopnda alguno de los siguientes pragmas.
+>
+> #pragma omp parallel for reduction
+>
+> - Comparando con el punto anterior. ¿Cuál es la opción elegida y por qué?
+
+Además de las anteriores,  posible solución sería declarando la directiva #pragma como sigue:
 
 ```
 #pragma omp parallel for reduction(+:sum)
@@ -203,11 +216,97 @@ con el siguiente resultado:
 
 ```
 Resultado: 10000.000000
-Tiempo: 0.000110
+Tiempo: 0.000105
 ```
 
-Aquí, vemos que hemos usado la cláusula `reduction`, específica para regiones paralelas de compartición de datos, que tiene que ser usada junto con `parallel for`.
+Aquí, vemos que hemos usado la cláusula `reduction`, específica para regiones paralelas de compartición de datos, que tiene que ser usada junto con `parallel for` - no aisladamente, ya que sería ignorada por el compilador y tendríamos una zona de acceso inseguro a los datos -, indicando los términos de la operación (aquí: '+:sum').
 
-Sin embargo, nos limitamos al enunciado y dejamos puesta la directiva `#pragma omp atomic` en el fichero **pescalar_par2.c**.
+Respecto al tiempo necesitado para ejecutarse, vemos que obtiene un tiempo de ejecución de 1 orden de magnitud inferior respecto a `critical` y `atomic`, puesto que en el caso de la directiva `#pragma omp atomic` requiere que cada _thread_ se sincronice, por lo que se tienen que serializar los _threads_; por otro lado, `#pragma omp for reduction` utiliza algoritmos de reducción en paralelo (ver: [Parallel patterns reduce & scan](https://courses.cs.washington.edu/courses/csep506/11sp/slides/Lecture-6-Parallel-Patterns.pdf))
 
-Hemos elegido `atomic` antes que `critical` por una razón, y es que, como se puede ver en la referencia que hemos dejado arriba, `atomic` hace referencia a un acceso a una parte concreta de memoria, mientras que `critical` se refiere a un bloque entero (ver [omp critical](https://scc.ustc.edu.cn/zlsc/tc4600/intel/2015.1.133/compiler_c/GUID-0C42D422-7CF5-44A7-AC12-43DF3CBD65A1.htm)); siendo más precisa la solución con `atomic` en este caso, pese a que tenga que modificarse la expresión.
+Así que, con esto, nuestra solución para **pescalar_par3.c** es utilizar la directiva `#pragma omp for reduction(+:sum)`
+
+> 2.6 Análisis de tiempos de ejecución
+
+Vamos a utilizar la versión **pescalar_serie.c** junto con su versión paralela **pescalar_par3.c** en este caso - la que nosotros consideramos como mejor solución.
+
+Los tamaños del vector serán los siguientes:
+
+ -> 1000 -> 10000 -> 100000 -> 10000000 -> 100000000
+
+Empezando en N=1000, con incrementos de N=N+N*10, hasta N=100000000.
+
+Sacando una media de tiempo para N=1000 de t ~ 6e-5s, para N=100000000 t ~ 4.6e-1s. 4 órdenes de diferencia de tiempo para 8 órdenes de diferencia de tamaño.
+
+Estos datos son previos, y sólo nos van a servir para poder justificar, a priori, los tamaños de vector elegido. Los datos finales se exponen a continuación.
+
+**Las gráficas generadas se encuentran en la carpeta ex2/img_a/. Los datos desde los que se generan están en la carpeta ex2/data_a/**
+
+El nombre de las imágenes tiene un número, que hace referencia al tamaño del vector que se ha ejecutado en ese caso, y en la gráfica se va incrementando en el eje horizontal el número de hilos que se lanzan (aunque en el caso de _serial_ siempre sea **0**). Se han generado entre 1 y 32 - puesto que con hyperthreading hay 16 cores, 2 * 16 = 32 - y una variación de tamaño de vector de entre 10 hasta 10000000 en incrementos de (N*10), obteniendo 6 tamaños distintos de vector. Para cada tamaño de vector y cada número de hilos se toman 20 datos, y se hace la media de todos ellos.
+
+Para N=10 se tiene:
+
+![](ex2/img_a/pescalar_10.png)
+
+Para N=100 se tiene:
+
+![](ex2/img_a/pescalar_100.png)
+
+Para N=1000 se tiene:
+
+![](ex2/img_a/pescalar_1000.png)
+
+Para N=10000 se tiene:
+
+![](ex2/img_a/pescalar_10000.png)
+
+Para N=100000 se tiene:
+
+![](ex2/img_a/pescalar_100000.png)
+
+Para N=1000000 se tiene:
+
+![](ex2/img_a/pescalar_1000000.png)
+
+Para N=10000000 se tiene:
+
+![](ex2/img_a/pescalar_10000000.png)
+
+En ellas se puede ver que según se va incrementando el tamaño del vector, es mejor la opción de multiprogramación, al igual que con el número de threads lanzados. La mejor opción para un grado alto de multiprogramación es tener tamaños grandes de vectores con un número alto de threads.
+
+Sobre las siguientes cuestiones:
+
+> En términos del tamaño de los vectores, ¿compensa siempre lanzar hilos para realizar el trabajo en paralelo, o hay casos en los que no?
+
+> Si no compensa siempre, ¿en qué casos no compensa y por qué?
+
+Siempre que se trabajen con tamaños muy reducidos de vectores, no compensa, pues se genera una sobrecarga de gestión de hilos que supera al tiempo que pueden ganar en la ejecución - y en el peor de los casos, si son muchos hilos, harán que el sistema operativo tarde más en ejecutar todos - por lo que no sería un caso en el que favoreciese eso.
+
+> ¿Se mejora siempre el rendimiento al aumentar el número de hilos a trabajar?
+
+No, ya que para casos favorables - tamaños de datos grandes -, si generamos un número de hilos muy superior al máximo que puedan ejecutarse en paralelo, lo que se consigue es que el sistema operativo tenga que encargarse de lanzarlos, pudiendo ralentizar la ejecución debido a la sobrecarga añadida.
+
+Esto se observa claramente en las gráficas de 10 < N < 10000, donde por cada más hilos que se lanzan, más tiempo tarda para un mismo tamaño de vector.
+
+> Si no fuera así, ¿a qué se debe este efecto?
+
+Ya ha sido contestado en el apartado anterior
+
+> Valore si existe algún tamaño de vector a partir del cual el comportamiento de la aceleración va a ser muy diferente al obtenido en la gráfica.
+
+Se puede pensar que para vectores de órdenes de magnitud suficientes, puesto que la gráfica no se ve clara, y por más que se repitan las pruebas, para O(10¹) - O(10⁴), siguen siendo favorables los casos de **serial**.
+
+Sin embargo, para O(10⁵) la gráfica, con pocos hilos, muestra mejores resultados para **parallel**, mientras que para muchos hilos no.
+
+A partir de O(10⁶), el caso de **parallel** toma ventaja y se mantiene así para tamaños de vector más grandes (nótese el caso de O(10⁷), que obtiene un resultado más estable el en el orden inferior).
+
+> Modifique el código de la versión paralela para que sólo se ejecute en paralelo cuando el tamaño de vector sea lo suficientemente grande y justifique la ejecución en paralelo. Para ello utilice la cláusula `if(expression)` dentro del pragma:
+>
+> `#pragma omp parallel if (M>valor)`
+
+Si se desea ejecutar sin esta versión, se deberá eliminar dicha parte de la cláusula del bucle for en el ficher **pescalar_par3.c**.
+
+Las gráficas, si se generasen en este caso, se superpondrían hasta que superasen el umbral definido en **pescalar_par3.c**, que es del valor = 50000; en nuestro caso sería a partir de vectores de tamaño >= 100000 (según nuestro _script_). Una vez superado ese umbral, las gráficas serían favorables para los casos de multiprogramación, tal y como se puede ver en las gráficas anteriores.
+
+## Ejercicio 3 - Paralelizar la multiplicación de matrices
+
+

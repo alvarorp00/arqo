@@ -1,4 +1,4 @@
 make clean
-exe="pescalar_par2"
+exe="pescalar_serie"
  rsync --delete -rvu ~/Documents/arquitectura/github/arqo/p4/ cluster:/home/arqo71/p4/
 ssh cluster "cd p4 && make clean && make $exe && qsub run $exe"

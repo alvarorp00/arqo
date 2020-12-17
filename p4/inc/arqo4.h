@@ -6,7 +6,7 @@
 #include <sys/time.h>
 
 #define N 1000ull
-#define M 10000ull
+#define M 10000000ull
 
 float ** generateMatrix(int);
 float ** generateEmptyMatrix(int);

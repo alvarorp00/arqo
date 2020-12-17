@@ -1,0 +1,101 @@
+#!/bin/bash
+
+source .src
+
+pair=7
+P=$(( pair % 8 + 1 ))
+fromN=$(( 10 ))
+toN=$(( 10000000 ))
+stepN=10
+fromC=$(( 1 ))
+toC=$(( 32 ))
+stepC=1
+nLoops=30
+
+info "P = $P\n"
+info "fromN = $fromN\n"
+info "stepN = N*$stepN\n"
+info "toN = $toN\n"
+info "fromC = $fromC\n"
+info "stepC = $stepC\n"
+info "toC = $toC\n"
+info "nLoops = $nLoops\n"
+
+fDAT=pescalar.dat
+fPNG=pescalar.png
+
+plotall() {
+
+  echo "Generating plot..."
+
+# llamar a gnuplot para generar el gráfico y pasarle directamente por la entrada
+# estándar el script que está entre "<< END_GNUPLOT" y "END_GNUPLOT"
+gnuplot << END_GNUPLOT
+set title "serial-parallel Execution Time"
+set ylabel "Execution time (s)"
+set xlabel "Threads in parallel"
+set key right bottom
+set grid
+set term png
+set output "$fPNG"
+plot "$fDAT" using 1:2 with lines lw 2 title "serial", \
+     "$fDAT" using 1:3 with lines lw 2 title "parallel"
+replot
+quit
+END_GNUPLOT
+
+}
+
+info "running serial and parallel ...\n"
+
+# bucle para N
+# N es el tamaño del Vector
+
+rm -f *.dat
+rm -f *.png
+
+for ((N = fromN ; N <= toN ; N *= stepN)); do
+
+  fDAT="pescalar_$N.dat"
+  fPNG="pescalar_$N.png" 
+
+  # bucle para C  
+  # C es el número de hilos
+
+  for ((C = fromC ; C <= toC ; C += stepC)); do
+
+    info "testing $C [$N][$C,$toC] ...\n"
+
+    # 
+
+    serialSum="0"
+    parallelSum="0"
+
+    for (( i=0 ; i < $nLoops; i +=1 )); do
+      echo -n "loop=$i; serial@$N: "
+      serialTime=$(./pescalar_serie $N | grep 'time' | awk '{print $2}')
+      echo "${serialTime}s"
+      echo -n "loop=$i; parallel@$N: "
+      parallelTime=$(./pescalar_par3 $C $N | grep 'time' | awk '{print $2}')
+      echo "${parallelTime}s"
+      serialSum=$(calc "$serialSum+$serialTime")
+      parallelSum=$(calc "$parallelSum+$parallelTime")
+    done
+
+    serialTime=$(calc "$serialSum/$nLoops")
+    parallelTime=$(calc "$parallelSum/$nLoops")
+
+    info "serialTimeAvg: $serialTime\n"
+    info "parallelTimeAvg: $parallelTime\n"
+
+    echo "$C  $serialTime	$parallelTime" >> $fDAT
+
+  done
+
+  plotall
+
+done
+
+
+success "done\n"
+

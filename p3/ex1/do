@@ -3,7 +3,7 @@
 source .src
 
 pair=7
-P=$(( pair % 7 + 4 ))
+P=$(( pair % 8 + 1 ))
 stepN=64
 fromN=$(( 10000 + 1024*P ))
 toN=$(( 10000 + 1024*(P+1) ))

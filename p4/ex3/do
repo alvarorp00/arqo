@@ -1,0 +1,113 @@
+#!/bin/bash
+
+source .src
+
+stepN=32
+fromN=$(( 256 + 256*P ))
+toN=$(( 256 + 256*(P+1) ))
+nLoops=5
+
+info "P = $P\n"
+info "fromN = $fromN\n"
+info "stepN = $stepN\n"
+info "nLoops = $nLoops\n"
+info "toN = $toN\n"
+
+plotall() {
+
+  echo "Generating plot..."
+
+# llamar a gnuplot para generar el gráfico y pasarle directamente por la entrada
+# estándar el script que está entre "<< END_GNUPLOT" y "END_GNUPLOT"
+gnuplot << END_GNUPLOT
+set title "Matrix multiplication comparison"
+set ylabel "Misses"
+set encoding utf8
+set xlabel "Matrix Size"
+set key right bottom
+set grid
+set term png
+set output "mult_time.png"
+
+plot  "mult.dat" using 1:2 with lines lc "orange" lw 2 dashtype 0 title 'mult', \
+      "mult.dat" using 1:3 with lines lc "orange" lw 2 dashtype 1 title 'tmult'
+
+replot
+quit
+END_GNUPLOT
+
+}
+
+blockSize=64 # cache line size
+cacheSizes=(1024 2048 4096 8192) # different cache sizes to be tested
+
+cache_name() {
+  echo "cache_$1.dat"
+}
+
+get_D1mr() {
+  cg_annotate $1 | grep 'PROGRAM TOTALS' | awk '{print $5}' | tr -d ','
+}
+
+get_D1mw() {
+  cg_annotate $1 | grep 'PROGRAM TOTALS' | awk '{print $8}' | tr -d ','
+}
+
+test_cache() { # <exe> <N> <out_file>
+  valgrind --tool=cachegrind \
+    --cachegrind-out-file=$3 \
+    $1 $2
+}
+
+info "running tests ...\n"
+
+# info "cleaning .dat files ...\n"
+# for size in ${cacheSizes[@]}; do
+#   rm -f $(cache_name $size)
+# done
+
+if [ ! -e mult.dat ]; then
+
+  for ((N = fromN ; N <= toN ; N += stepN)); do
+
+    info "testing N [$N,$toN] ...\n"
+
+    multSum="0"
+    tmultSum="0"
+
+    # time test
+    for (( i=0 ; i < $nLoops; i +=1 )); do
+      echo -n "loop=$i; mult@$N: "
+      multTime=$(./mult $N | grep 'time' | awk '{print $3}')
+      echo "${multTime}s"
+      echo -n "loop=$i; tmult@$N: "
+      tmultTime=$(./tmult $N | grep 'time' | awk '{print $3}')
+      echo "${tmultTime}s"
+      
+      multSum=$(calc "$multSum+$multTime")
+      tmultSum=$(calc "$tmultSum+$tmultTime")
+    done
+
+    multTime=$(calc "$multSum/$nLoops")
+    tmultTime=$(calc "$tmultSum/$nLoops")
+
+    info "slowTimeAvg: $multTime\n"
+    info "fastTimeAvg: $tmultTime\n"
+
+    # cache test
+    # test_cache ./mult $N "cachegrind.mult"
+    # test_cache ./tmult $N "cachegrind.tmult"
+
+    # multD1mr=$(get_D1mr cachegrind.mult)
+    # multD1mw=$(get_D1mw cachegrind.mult)
+    # tmultD1mr=$(get_D1mr cachegrind.tmult)
+    # tmultD1mw=$(get_D1mw cachegrind.tmult)
+
+    #echo "$multTime $multD1mr $multD1mw $tmultTime $tmultD1mr $tmultD1mw" >> mult.dat
+    echo "$N $multTime $tmultTime" >> mult.dat
+  done
+
+fi
+
+plotall
+success "done\n"
