@@ -4,8 +4,13 @@ FLAGS = -g -lgomp -lm -Wall -D_GNU_SOURCE -fopenmp
 
 .PHONY: clean all
 
-update:
-	./update.sh
+default: clean send
+
+send:
+	./update
+
+qsub:
+	./exe
 
 all: omp1 omp2 pescalar_serie pescalar_par1 edgeDetector clear
 
@@ -19,6 +24,9 @@ pescalar_serie: pescalar_serie.c arqo4.c
 	gcc $(FLAGS) $(LIB_DIR) -o $@ $^ $(LIBS)
 
 pescalar_par1: pescalar_par1.c arqo4.c
+	gcc $(FLAGS) $(LIB_DIR) -o $@ $^ $(LIBS)
+
+pescalar_par2: pescalar_par2.c arqo4.c
 	gcc $(FLAGS) $(LIB_DIR) -o $@ $^ $(LIBS)
 
 edgeDetector: edgeDetector.c stb_image_write.h stb_image.h

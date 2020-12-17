@@ -14,7 +14,6 @@ int main(void)
 	long long k=0;
 	struct timeval fin,ini;
 	double sum=0;
-     	
        
 	A = generateVectorOne(M);
 	B = generateVectorOne(M);
@@ -35,9 +34,10 @@ int main(void)
 	/* Bloque de computo */
 	sum = 0;
 	
-  #pragma omp parallel for
+  #pragma omp parallel for reduction(+:sum)
 	for(k=0;k<M;k++)
 	{
+    // #pragma omp critical
 		sum = sum + A[k]*B[k];
 	}
 	/* Fin del computo */

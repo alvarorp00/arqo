@@ -13,19 +13,30 @@ int main(int argc, char *argv[])
 	printf("Hay %d cores disponibles\n", nproc);
 
 	if (argc == 2)
-     		arg = atoi( argv[1] );	
-        else
-        	arg = nproc;  
-        omp_set_num_threads(arg);
+    arg = atoi( argv[1] );	
+  else
+    arg = nproc;  
+  omp_set_num_threads(arg);
 	nthr = omp_get_max_threads();
 	printf("Me han pedido que lance %d hilos\n", nthr);
 	
-	#pragma omp parallel private(tid)
-	{
-		tid = omp_get_thread_num();
-		nthr = omp_get_num_threads();
-		printf("Hola, soy el hilo %d de %d\n", tid, nthr);
-	}
+	// #pragma omp parallel private(tid) num_threads(nthr*2)
+	// {
+	// 	for (size_t i = 0; i < 10000000; i++)
+  //   {
+  //     tid = omp_get_thread_num();
+  //     nthr = omp_get_num_threads();
+  //     printf("Hola, soy el hilo %d de %d\n", tid, nthr);
+  //   }
+    
+	// }
+
+  #pragma omp parallel private(tid)
+  {
+    tid = omp_get_thread_num();
+    nthr = omp_get_num_threads();
+    printf("Hola, soy el hilo %d de %d\n", tid, nthr);
+  }
 	
 	return 0;
 }

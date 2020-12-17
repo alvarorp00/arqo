@@ -33,7 +33,7 @@ int main(void)
 	/* Fin del computo */
 	gettimeofday(&fin,NULL);
 
-	printf("Resultado: %f\n",sum);
+	printf("\nResultado: %f\n",sum);
 	printf("Tiempo: %f\n", ((fin.tv_sec*1000000+fin.tv_usec)-(ini.tv_sec*1000000+ini.tv_usec))*1.0/1000000.0);
 	freeVector(A);
 	freeVector(B);

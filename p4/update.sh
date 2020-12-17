@@ -1,1 +1,0 @@
-rsync --delete -rvu ~/Documents/arquitectura/github/arqo/p4/ cluster:/home/arqo71/p4/
