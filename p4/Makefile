@@ -4,6 +4,9 @@ FLAGS = -g -lgomp -lm -Wall -D_GNU_SOURCE -fopenmp
 
 .PHONY: clean all
 
+update:
+	./update.sh
+
 all: omp1 omp2 pescalar_serie pescalar_par1 edgeDetector clear
 
 omp1: omp1.c
