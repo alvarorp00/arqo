@@ -32,14 +32,14 @@ plotall() {
 # estándar el script que está entre "<< END_GNUPLOT" y "END_GNUPLOT"
 gnuplot << END_GNUPLOT
 set title "serial-parallel Execution Time"
-set ylabel "Execution time (s)"
+set ylabel "Speedup"
 set xlabel "Threads in parallel"
 set key right bottom
 set grid
 set term png
 set output "$fPNG"
-plot "$fDAT" using 1:2 with lines lw 2 title "serial", \
-     "$fDAT" using 1:3 with lines lw 2 title "parallel"
+plot "$fDAT" using 1:2 with lines lw 2 title "Acc" #, \
+    #  "$fDAT" using 1:3 with lines lw 2 title "parallel" // Uncomment this & change Acc to Serial if non-acceleration graphs are desired
 replot
 quit
 END_GNUPLOT
@@ -70,6 +70,7 @@ for ((N = fromN ; N <= toN ; N *= stepN)); do
 
     serialSum="0"
     parallelSum="0"
+    speedup="0"
 
     for (( i=0 ; i < $nLoops; i +=1 )); do
       echo -n "loop=$i; serial@$N: "
@@ -85,10 +86,18 @@ for ((N = fromN ; N <= toN ; N *= stepN)); do
     serialTime=$(calc "$serialSum/$nLoops")
     parallelTime=$(calc "$parallelSum/$nLoops")
 
+    x=$(calc "$serialTime/$parallelTime")
+    if [ $? -ne 0 ]; then
+      speedup="0"
+    else
+      speedup="$x"
+    fi
+
     info "serialTimeAvg: $serialTime\n"
     info "parallelTimeAvg: $parallelTime\n"
 
-    echo "$C  $serialTime	$parallelTime" >> $fDAT
+    echo "$C  $speedup" >> $fDAT # Speedup
+    # echo "$C  $serialTime $parallelTime" >> $fDAT # Diff
 
   done
 

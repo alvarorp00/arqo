@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 	/* Bloque de computo */
 	sum = 0;
 	
-  #pragma omp parallel for reduction(+:sum)   if(__size>_THRESHOLD_)
+  #pragma omp parallel for reduction(+:sum) if(__size>_THRESHOLD_)
 	for(k=0;k<__size;k++)
 	{
 		sum = sum + A[k]*B[k];

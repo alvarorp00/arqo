@@ -2,9 +2,14 @@
 
 source .src
 
-stepN=32
-fromN=$(( 256 + 256*P ))
-toN=$(( 256 + 256*(P+1) ))
+pair=7
+P=$(( pair % 8 + 1 ))
+stepN=64
+fromN=$(( 512 + P ))
+toN=$(( 1024 + 512 + P ))
+stepC=1
+fromC=(( 1 ))
+toC=(( 16 )) # 16 cores in cluster
 nLoops=5
 
 info "P = $P\n"
@@ -12,6 +17,9 @@ info "fromN = $fromN\n"
 info "stepN = $stepN\n"
 info "nLoops = $nLoops\n"
 info "toN = $toN\n"
+
+fDAT="pescalar_$N.dat"
+fPNG="pescalar_$N.png"
 
 plotall() {
 
@@ -27,10 +35,10 @@ set xlabel "Matrix Size"
 set key right bottom
 set grid
 set term png
-set output "mult_time.png"
+set output "$fPNG"
 
-plot  "mult.dat" using 1:2 with lines lc "orange" lw 2 dashtype 0 title 'mult', \
-      "mult.dat" using 1:3 with lines lc "orange" lw 2 dashtype 1 title 'tmult'
+plot  "$fDAT" using 1:2 with lines lc "orange" lw 2 dashtype 0 title 'serial_mult', \
+      "$fDAT" using 1:3 with lines lc "blue" lw 2 dashtype 1 title 'parallel_mult'
 
 replot
 quit
@@ -38,7 +46,6 @@ END_GNUPLOT
 
 }
 
-blockSize=64 # cache line size
 cacheSizes=(1024 2048 4096 8192) # different cache sizes to be tested
 
 cache_name() {

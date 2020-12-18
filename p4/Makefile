@@ -32,6 +32,9 @@ pescalar_par2: ex2/pescalar_par2.c arqo4.c
 pescalar_par3: ex2/pescalar_par3.c arqo4.c
 	gcc $(FLAGS) $(LIB_DIR) -o $@ $^ $(LIBS)
 
+mult: ex3/mult.c arqo3.c arqo4.c
+	gcc $(FLAGS) $(LIB_DIR) -o $@ $^ $(LIBS)
+
 edgeDetector: edgeDetector.c stb_image_write.h stb_image.h
 	gcc $(FLAGS) -std=gnu99 $(LIB_DIR) -o $@ edgeDetector.c $(LIBS)
 

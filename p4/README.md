@@ -223,6 +223,8 @@ Aquí, vemos que hemos usado la cláusula `reduction`, específica para regiones
 
 Respecto al tiempo necesitado para ejecutarse, vemos que obtiene un tiempo de ejecución de 1 orden de magnitud inferior respecto a `critical` y `atomic`, puesto que en el caso de la directiva `#pragma omp atomic` requiere que cada _thread_ se sincronice, por lo que se tienen que serializar los _threads_; por otro lado, `#pragma omp for reduction` utiliza algoritmos de reducción en paralelo (ver: [Parallel patterns reduce & scan](https://courses.cs.washington.edu/courses/csep506/11sp/slides/Lecture-6-Parallel-Patterns.pdf))
 
+La principal ventaja de estos algoritmos de reducción es que cada _thread_ acumula su propia suma parcial, y finalmente estos valores se suman conjuntamente, por lo que no requieren de serializar los _threads_.
+
 Así que, con esto, nuestra solución para **pescalar_par3.c** es utilizar la directiva `#pragma omp for reduction(+:sum)`
 
 > 2.6 Análisis de tiempos de ejecución
@@ -239,9 +241,11 @@ Sacando una media de tiempo para N=1000 de t ~ 6e-5s, para N=100000000 t ~ 4.6e-
 
 Estos datos son previos, y sólo nos van a servir para poder justificar, a priori, los tamaños de vector elegido. Los datos finales se exponen a continuación.
 
-**Las gráficas generadas se encuentran en la carpeta ex2/img_a/. Los datos desde los que se generan están en la carpeta ex2/data_a/**
+**Las gráficas generadas se encuentran en la carpeta ex2/img_a/ (comparativa de serial y parallel) y ex2/img_b/ (speedup). Los datos desde los que se generan están en la carpeta ex2/data_a/ y ex2/data_b/**
 
 El nombre de las imágenes tiene un número, que hace referencia al tamaño del vector que se ha ejecutado en ese caso, y en la gráfica se va incrementando en el eje horizontal el número de hilos que se lanzan (aunque en el caso de _serial_ siempre sea **0**). Se han generado entre 1 y 32 - puesto que con hyperthreading hay 16 cores, 2 * 16 = 32 - y una variación de tamaño de vector de entre 10 hasta 10000000 en incrementos de (N*10), obteniendo 6 tamaños distintos de vector. Para cada tamaño de vector y cada número de hilos se toman 20 datos, y se hace la media de todos ellos.
+
+Primero, observamos las gráficas en que se representan ambas opciones - serial y parallel.
 
 Para N=10 se tiene:
 
@@ -273,10 +277,40 @@ Para N=10000000 se tiene:
 
 En ellas se puede ver que según se va incrementando el tamaño del vector, es mejor la opción de multiprogramación, al igual que con el número de threads lanzados. La mejor opción para un grado alto de multiprogramación es tener tamaños grandes de vectores con un número alto de threads.
 
+Ahora veamos las gráficas con la aceleración conseguida - observando la consecuencia lógica de las gráficas anteriores.
+
+Para N=10 se tiene:
+
+![](ex2/img_b/pescalar_10.png)
+
+Para N=100 se tiene:
+
+![](ex2/img_b/pescalar_100.png)
+
+Para N=1000 se tiene:
+
+![](ex2/img_b/pescalar_1000.png)
+
+Para N=10000 se tiene:
+
+![](ex2/img_b/pescalar_10000.png)
+
+Para N=100000 se tiene:
+
+![](ex2/img_b/pescalar_100000.png)
+
+Para N=1000000 se tiene:
+
+![](ex2/img_b/pescalar_1000000.png)
+
+Para N=10000000 se tiene:
+
+![](ex2/img_b/pescalar_10000000.png)
+
 Sobre las siguientes cuestiones:
 
 > En términos del tamaño de los vectores, ¿compensa siempre lanzar hilos para realizar el trabajo en paralelo, o hay casos en los que no?
-
+>
 > Si no compensa siempre, ¿en qué casos no compensa y por qué?
 
 Siempre que se trabajen con tamaños muy reducidos de vectores, no compensa, pues se genera una sobrecarga de gestión de hilos que supera al tiempo que pueden ganar en la ejecución - y en el peor de los casos, si son muchos hilos, harán que el sistema operativo tarde más en ejecutar todos - por lo que no sería un caso en el que favoreciese eso.
@@ -308,5 +342,55 @@ Si se desea ejecutar sin esta versión, se deberá eliminar dicha parte de la cl
 Las gráficas, si se generasen en este caso, se superpondrían hasta que superasen el umbral definido en **pescalar_par3.c**, que es del valor = 50000; en nuestro caso sería a partir de vectores de tamaño >= 100000 (según nuestro _script_). Una vez superado ese umbral, las gráficas serían favorables para los casos de multiprogramación, tal y como se puede ver en las gráficas anteriores.
 
 ## Ejercicio 3 - Paralelizar la multiplicación de matrices
+
+Para ejecutar esta parte, hay que ejecutar:
+
+`make mult; ./mult <N> <option[1,2,3,4]> <#hilos (si option > 1)>`
+
+donde _N_ hace referencia al tamaño de la matriz cuadrada y _option_ a la opción que se ejecutará:
+
+  1. Sin paralelizar
+  2. Bucle más interno
+  3. Bucle intermedio
+  4. Bucle externo
+
+Primero, completamos la tabla de tiempos, después la de aceleración. Para el caso de 'Serie' hemos tomado 4 medidas y realizado la media que daba en la salida de estas. Para las demás, hemos tomado 5 medidas de las mismas.
+
+Para el primer apartado, vamos a tomar valores con N = 2000. Los datos de salida del programa para las diferentes versiones es la siguiente:
+
+| Versión \ #Hilos 	  |   1  	        |   2	          |   3	          |   4	            |
+|-------------------- |-------------  |-------------- |-------------  |---------------  |
+|       Serie         |  83.649324 	  | 83.649324  	  | 83.649324  	  | 83.649324   	  |
+| Paralela - loop 1   |  102.083016   | 57.335779     | 45.732592     | 39.902324       |
+| Paralela - loop 2   |  114.073157   | 53.373445     | 38.979364     | 30.391888       |
+| Paralela - loop 3   |  98.250049    | 52.256980     | 35.262153     | 26.886549       |
+
+En vista de los resultados, vemos que los mejores resultados salen al paralelizar la región más externa del bucle. Esto puede deberse principalmente a la sobrecarga que produce paralelizar los bucles internos, y es que el crecimiento de la gestión de hilos tendrá un crecimiento O(N²) en el bucle intermedio, y O(N³) en el bucle más interno. Al realizar la paralelización fuera, eliminamos este problema y disminuimos las tareas de gestión de ejecución de los hilos por el sistema operativo. Por otro lado, vemos que lanzando más hilos, la mejora se acentúa en todos los casos - a diferencia del caso **serial**, que no varía, pues no depende del grado de la multiprogramación.
+
+Con estos datos, podemos sacar la tabla de aceleración para cada caso:
+
+| Versión \ #Hilos 	  |   1  	        |   2	          |   3	          |   4	            |
+|-------------------- |-------------  |-------------- |-------------  |---------------  |
+|       Serie         |  1         	  | 1         	  | 1         	  | 1            	  |
+| Paralela - loop 1   |  0.82         | 1,458937603   | 1,829096501   | 2,096352182     |
+| Paralela - loop 2   |  0.733        | 1,567246109   | 2,145989965   | 2,752356945     |
+| Paralela - loop 3   |  0.85139      | 1,600730161   | 2,37221261    | 3,111196011     |
+
+
+> 3.1 ¿Cuál de las tres versiones obtiene peor rendimiento? ¿A qué se debe? ¿Cuál de las tres versiones obtiene el mejor rendimiento?
+> ¿A qué se debe?
+
+Ya ha sido respondido en los comentarios sobre la tabla.
+
+> 3.2 En base a los resultados, ¿cree que es preferible la paralelización de grano fino (bucle más interno)
+> o de grano grueso (bucle más externo) en otros algoritmos? 
+
+Dependería del caso seguramente, pero en este en concreto, es preferible la paralelización de grano grueso, con tal de eliminar sobrecarga de gestión y ejecución de hilos - por OpenMP primero y por el SO después.
+
+> Tomando como referencia los tiempos de ejecución de la versión serie y el de la mejor versión paralela
+> obtenida anteriormente (la mejor combinación entre las tres versiones de código, y las C posibilidades para
+> el número de hilos paralelos). Tome tiempos en un fichero y realice una gráfica de la evolución del tiempo
+> de ejecución y la aceleración (de la versión paralela vs serie) al ir variando el tamaño de las matrices de NxN
+> para N entre 512+P y 1024+512+P (con incrementos en N de 64).
 
 
