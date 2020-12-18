@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <math.h>
 #include <sys/time.h>
+#include <omp.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -19,6 +20,7 @@ float* gaussian_kernel(int ksize, double sigma) {
     int i, j;
     
     for (j = 0; j < ksize; j++) {
+        #pragma omp parallel for reduction(+:sum)
         for (i = 0; i < ksize; i++) {
             double x = i - (ksize - 1) / 2.0;
             double y = j - (ksize - 1) / 2.0;
@@ -28,8 +30,9 @@ float* gaussian_kernel(int ksize, double sigma) {
     }
 
     for (i = 0; i < ksize; i++) {
+        #pragma omp parallel for
         for (j = 0; j < ksize; j++) {
-            gauss[i + ksize*j] /= sum;
+            gauss[i*ksize + j] /= sum;
         }
     }
 
@@ -55,12 +58,20 @@ int main(int nargs, char **argv)
     int width, height, nchannels;
     struct timeval fin,ini;
 
+    int _nthreads, _ncores;
+
     if (nargs < 2)
     {
         printf("Usage: %s <image1> [<image2> ...]\n", argv[0]);
     }
     // For each image
     // Bucle 0
+    _ncores = omp_get_max_threads();
+    _nthreads = _ncores;
+    printf("Launching %d threads\n", _nthreads);
+    // _nthreads = nargs < _ncores ? nargs : _ncores;
+    omp_set_num_threads(_nthreads);
+    // #pragma omp parallel for private(width, height, nchannels, fin, ini)
     for (int file_i = 1; file_i < nargs; file_i++)
     {
         printf("[info] Processing %s\n", argv[file_i]);
@@ -154,9 +165,10 @@ int main(int nargs, char **argv)
         gettimeofday(&ini,NULL);
         // RGB to grey scale
         int r, g, b;
-        for (int i = 0; i < width; i++)
+        for (int j = 0; j < height; j++)
         {
-            for (int j = 0; j < height; j++)
+            # pragma omp parallel for default(shared) private(r, g, b) // rgb_image is initialized before, parallelize 2 loop
+            for (int i = 0; i < width; i++)
             {
                 getRGB(rgb_image, width, height, 4, i, j, &r, &g, &b);
                 grey_image[j * width + i] = (int)(0.2989 * r + 0.5870 * g + 0.1140 * b);
@@ -169,9 +181,10 @@ int main(int nargs, char **argv)
 
         // Sobel edge detection
 #define PIXEL_GREY(x, y) (grey_image[(x) + (y)*width])
-        for (int i = 1; i < width - 1; i++)
+        for (int j = 1; j < height - 1; j++)
         {
-            for (int j = 1; j < height - 1; j++)
+            # pragma omp parallel for
+            for (int i = 1; i < width - 1; i++)
             {
                 int x = i - 1;
                 int y = j - 1;
@@ -222,16 +235,17 @@ int main(int nargs, char **argv)
             printf("[info] Using gaussian denoising...\n");
             float* kernel = gaussian_kernel(2*radius+1, 1.0);
             double sum = 0;
-            for (int i = radius; i < width_edges - radius; i++)
+            # pragma omp parallel for private(x, y) reduction(+:sum)
+            for (int j = radius; j < height_edges - radius; j++)
             {
-                for (int j = radius; j < height_edges - radius; j++)
+                for (int i = radius; i < width_edges - radius; i++)
                 {
                     x = i - radius;
                     y = j - radius;
                     sum = 0;
-                    for (int p1 = 0; p1 <= 2 * radius; p1++)
+                    for (int p2 = 0; p2 <= 2 * radius; p2++)
                     {
-                        for (int p2 = 0; p2 <= 2 * radius; p2++)
+                        for (int p1 = 0; p1 <= 2 * radius; p1++)
                         {
                             if (kernel[p1+p2*(2*radius+1)]>1) 
                                 printf("%f, %d, %d\n", kernel[p1+p2*(2*radius+1)], p1, p2);

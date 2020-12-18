@@ -516,4 +516,247 @@ Una posible causa del funcionamiento más lento por parte de la versión 6 es el
 
 ## Ejercicio 5 - Optimización de programas de cálculo
 
+<b>Preguntas:</b>
 
+> 1. El programa incluye un bucle más externo que itera sobre los argumentos aplicando los algoritmos a
+>    cada uno de los argumentos (señalado como Bucle 0). ¿Es este bucle el óptimo para ser paralelizado?
+>
+>      a. ¿Qué sucede si se pasan menos argumentos que número de cores?
+>
+>      b. Suponga que va a procesar imágenes de un telescopio espacial que ocupan hasta 6GB cada
+>        una, ¿es la opción adecuada? Comente cuanta memoria consume cada hilo en función del
+>        tamaño en pixeles de la imagen de entrada
+
+
+Para paralelizar el bucle más externo, podríamos fijar el número de threads a lanzar en función de si el número de argumentos es superior al número de cores. En caso positivo, se lanzarán tantos hilos como cores haya, en caso contrario, tantos hilos como argumentos se hayan pasado. Veamos esta solución:
+
+```
+_ncores = omp_get_max_threads();
+_nthreads = nargs < _ncores ? nargs : _ncores;
+omp_set_num_threads(_nthreads);
+#pragma omp parallel for ...
+```
+
+Todavía no vamos a realizar medidas de rendimiento en este punto.
+
+Por otro lado, es interesante ver cuánta memoria puede llegar a estar consumiendo cada hilo, aunque haremos la ejecución normal, que sería extrapolable:
+
+```
+❯ valgrind --leak-check=full ./edgeDetector ex5/src_img/SD.jpg
+```
+
+La imagen SD pesa ~ 55KB, por lo que nos servirá para aproximar hasta 6GB (10⁵ órdenes de diferencia). El resultado es de ~ 2 * 10⁶ Bytes ~ 2MB.
+
+```
+❯ valgrind --leak-check=full ./edgeDetector ex5/src_img/8K.jpg
+```
+
+La imagen 8K pesa ~ 5.4MB. Al ejecutar el programa para esta imagen, la salida es de 331,784,053 bytes ~ 330 MB.
+
+Siguiendo estos dos ejemplos, y estimando la memoria necesitada para procesar ese tamaño de imágenes, se necesitarían ~ 200 - 300 GB de memoria, por lo que la solución podría no ser adecuada, necesitando cada hilo un tamaño de dicha magnitud, podrían llegar a acabar con la memoria del sistema.
+
+> 2. Durante la práctica anterior, observamos que el orden de acceso a los datos es importante. ¿Hay algún
+> bucle que esté accediendo en un orden subóptimo a los datos? Corríjalo en tal caso.
+>
+>      a. Es imprescindible que el programa siga realizando el mismo algoritmo, por lo que solo se
+>         deberían realizar cambios en el programa que no cambien la salida.
+>
+>      b. Explique por qué el orden no es el correcto en caso de cambiarlo.
+
+
+Esta parte del enunciado se refiere a la siguiente parte del código: [En la función `float* gaussian_kernel(int ksize, double sigma)`]
+
+```
+for (i = 0; i < ksize; i++) {
+    for (j = 0; j < ksize; j++) {
+        gauss[i + ksize*j] /= sum;
+    }
+}
+```
+
+Que sustituimos por esto otro:
+
+```
+for (i = 0; i < ksize; i++) {
+    for (j = 0; j < ksize; j++) {
+        gauss[i*ksize + j] /= sum;
+    }
+}
+```
+
+Como podemos ver, pasamos de tener un acceso por saltos, a un acceso _semisecuencial_, pues el rango de la variable **_i_** varía en las iteraciones externas, y la **_j_** en las internas, por lo que es preferible acceder de seguido a las posiciones dadas por la variable con menos variaciones en los bucles interiores.
+
+Y también:
+
+```
+167         int r, g, b;
+168         for (int j = 0; j < height; j++)
+169         {
+170             
+171             for (int i = 0; i < width; i++)
+172             {
+173                 getRGB(rgb_image, width, height, 4, i, j, &r, &g, &b);
+174                 grey_image[j * width + i] = (int)(0.2989 * r + 0.5870 * g + 0.1140 * b);
+175             }
+176         }
+```
+
+Ésta última es la final, que ha sufrido un cambio de bucle. Primero se ejecuta el bucle **_j_** y luego el bucle **_i_**.
+
+Lo mismo para:
+
+```
+182         // Sobel edge detection
+183 #define PIXEL_GREY(x, y) (grey_image[(x) + (y)*width])
+184         for (int j = 1; j < height - 1; j++)
+185         {
+186             # pragma omp parallel for
+187             for (int i = 1; i < width - 1; i++)
+188             {
+189                 int x = i - 1;
+190                 int y = j - 1;
+191                 float a = (PIXEL_GREY(i - 1, j - 1) + PIXEL_GREY(i - 1, j) * 2 + PIXEL_GREY(i - 1, j + 1) -
+192                            (PIXEL_GREY(i + 1, j - 1) + PIXEL_GREY(i + 1, j) * 2 + PIXEL_GREY(i + 1, j + 1)));
+193                 float b = (PIXEL_GREY(i - 1, j - 1) + PIXEL_GREY(i, j - 1) * 2 + PIXEL_GREY(i + 1, j - 1) -
+194                            (PIXEL_GREY(i - 1, j + 1) + PIXEL_GREY(i - 1, j + 1) * 2 + PIXEL_GREY(i - 1, j + 1)));
+195
+196                 edges[x + y * width_edges] = sqrt(a * a + b * b);
+197             }
+198         }
+```
+
+También aquí:
+
+```
+233         // More classic gaussian filter
+234         } else {
+235             printf("[info] Using gaussian denoising...\n");
+236             float* kernel = gaussian_kernel(2*radius+1, 1.0);
+237             double sum = 0;
+238             # pragma omp parallel for private(x, y) reduction(+:sum)
+239             for (int j = radius; j < height_edges - radius; j++)
+240             {
+241                 for (int i = radius; i < width_edges - radius; i++)
+242                 {
+243                     x = i - radius;
+244                     y = j - radius;
+245                     sum = 0;
+246                     for (int p2 = 0; p2 <= 2 * radius; p2++)
+247                     {
+248                         for (int p1 = 0; p1 <= 2 * radius; p1++)
+249                         {
+250                             if (kernel[p1+p2*(2*radius+1)]>1) 
+251                                 printf("%f, %d, %d\n", kernel[p1+p2*(2*radius+1)], p1, p2);
+252                             sum += kernel[p1+p2*(2*radius+1)] * PIXEL_EDGES(i-radius+p1, j-radius+p2);
+253                         }
+254                     }
+255                     edges_denoised[x + y * width_denoised] = sum>50?255:0;
+256                 }
+257             }
+258         }
+```
+
+En esta última además ha sido doble, primero intercambiamos el orden iterador de **_i_** y **_j_**, y luego de **_p1_** y **_p2_**.
+
+El programa sigue realizando el mismo algoritmo, puesto que sólo se ha cambiado el orden de acceso a una modificación de una matriz, pero cuyos valores serán comunes puesto que el factor de división siempre será el mismo.
+
+Se podría hacer también para el caso `MEDIAN`, pero como no lo usamos ni lo hemos modificado, ni lo haremos con los `pragma`.
+
+> 3. Obviando el Bucle 0, pruebe diferentes paralelizaciones con OpenMP comentando cuales deberían
+>    obtener mejor rendimiento.
+>      a. Es imprescindible que el programa siga realizando el mismo algoritmo, por lo que solo se
+>         deberían realizar cambios en el programa que no cambien la salida.
+>
+>      b. No es necesaria la exploración completa de todas las posibles paralelizaciones, es necesario
+>         utilizar los conocimientos obtenidos en la práctica para acotar cuales serían las mejores
+>         soluciones. Los razonamientos que utilice deben ser incluidos en la memoria.
+
+
+Hemos incluido diferentes directrices `# pragma` en el fichero. Las comentamos a continuación:
+
+```
+ 17 float* gaussian_kernel(int ksize, double sigma) {
+ 18     float* gauss = malloc(ksize*ksize*sizeof(float));
+ 19     double sum = 0;
+ 20     int i, j;
+ 21     
+ 22     for (j = 0; j < ksize; j++) {
+ 23         #pragma omp parallel for reduction(+:sum)
+ 24         for (i = 0; i < ksize; i++) {
+ 25             double x = i - (ksize - 1) / 2.0;
+ 26             double y = j - (ksize - 1) / 2.0;
+ 27             gauss[i + ksize*j] = (GAUSSIAN_K * exp(((pow(x, 2) + pow(y, 2)) / ((2 * pow(sigma, 2)))) * (-1)));
+ 28             sum += gauss[i + ksize*j];
+ 29         }
+ 30     }
+ 31
+ 32     for (i = 0; i < ksize; i++) {
+ 33         #pragma omp parallel for
+ 34         for (j = 0; j < ksize; j++) {
+ 35             gauss[i*ksize + j] /= sum;
+ 36         }
+ 37     }
+ 38
+ 39     return gauss;
+ 40 }
+```
+
+En este caso, en esta función, vemos que tenemos 2 directrices declaradas. La primera, se apoya en algoritmos de reducción paralela para reducir la suma `sum += gauss[i + ksize*j`
+
+La segunda, paraleliza el bucle interno en la división. La cláusula `reduction` no admite la división, por lo que no podemos usarla aquí.
+
+Seguimos con la siguiente:
+
+```
+166         // RGB to grey scale
+167         int r, g, b;
+168         for (int i = 0; i < width; i++)
+169         {
+170             # pragma omp parallel for default(shared) private(r, g, b)
+                  // rgb_image is initialized before
+171             for (int j = 0; j < height; j++)
+172             {
+173                 getRGB(rgb_image, width, height, 4, i, j, &r, &g, &b);
+174                 grey_image[j * width + i] = (int)(0.2989 * r + 0.5870 * g + 0.1140 * b);
+175             }
+176         }
+```
+
+Vemos que la directiva `# pragma` está en el bucle interno, que se encarga de calcular el valor de grey_image, pone por defecto como compartidas a las que hubiese declaradas antes y como privadas r, g, b; estas últimas se modificarán concurrentemente por lo que evitará fallos debido a modificación de datos.
+
+Por último, hemos paralelizado ésta sección:
+
+```
+233         // More classic gaussian filter
+234         } else {
+235             printf("[info] Using gaussian denoising...\n");
+236             float* kernel = gaussian_kernel(2*radius+1, 1.0);
+237             double sum = 0;
+238             # pragma omp parallel for private(x, y) reduction(+:sum)
+239             for (int j = radius; j < height_edges - radius; j++)
+240             {
+241                 for (int i = radius; i < width_edges - radius; i++)
+242                 {
+243                     x = i - radius;
+244                     y = j - radius;
+245                     sum = 0;
+246                     for (int p2 = 0; p2 <= 2 * radius; p2++)
+247                     {
+248                         for (int p1 = 0; p1 <= 2 * radius; p1++)
+249                         {
+250                             if (kernel[p1+p2*(2*radius+1)]>1) 
+251                                 printf("%f, %d, %d\n", kernel[p1+p2*(2*radius+1)], p1, p2);
+252                             sum += kernel[p1+p2*(2*radius+1)] * PIXEL_EDGES(i-radius+p1, j-radius+p2);
+253                         }
+254                     }
+255                     edges_denoised[x + y * width_denoised] = sum>50?255:0;
+256                 }
+257             }
+258         }
+```
+
+Donde usamos `# pragma omp parallel ...` para calcular la suma, utilizando `reduction`, por lo que evitamos que los _threads_ tengan que serializarse, ahorrando así tiempo. Además, declaramos **_x_** e **_y_** como private ya que se van a estar modificando dentro de la región paralela. La razón de ponerlo en la parte externa del bucle es que conseguimos una paralelización de grano grueso, con menor sobrecarga, ya que de la otra manera tiende a volverse excesivamente lento.
+
+> 4.  Rellene una tabla con resultados de tiempos y speedup respecto a la versión serie para imágenes de
+>     distintas resoluciones (SD, HD, FHD, UHD-4k, UHD-8k). Añada a su vez una columna que sea la tasa de
+>     fps a la que procesaría el programa

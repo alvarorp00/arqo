@@ -1,4 +1,4 @@
-LIBS = 
+LIBS = -lm
 LIB_DIR =  
 FLAGS = -g -lgomp -lm -Wall -D_GNU_SOURCE -fopenmp -I inc/
 
@@ -36,7 +36,7 @@ pi_par: ex4/pi_par7.c arqo4.c
 	rm -rf pi_par
 	gcc $(FLAGS) $(LIB_DIR) -o $@ $^ $(LIBS)
 
-edgeDetector: ex5/edgeDetector.c stb_image_write.h stb_image.h
+edgeDetector: edgeDetector.c stb_image_write.h stb_image.h
 	gcc $(FLAGS) -std=gnu99 $(LIB_DIR) -o $@ edgeDetector.c $(LIBS)
 
 stb_image.h:
