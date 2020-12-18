@@ -1,4 +1,4 @@
-# ARQUITECTURA - PRÁCTICA 4
+# ARQUITECTURA DE ORDENADORES - PRÁCTICA 4
 
 Autores:
   - Álvaro Rodríguez Palacios
@@ -233,9 +233,9 @@ Vamos a utilizar la versión **pescalar_serie.c** junto con su versión paralela
 
 Los tamaños del vector serán los siguientes:
 
- -> 1000 -> 10000 -> 100000 -> 10000000 -> 100000000
+ 10 -> 100 -> 1000 -> 10000 -> 100000 -> 10000000 -> 100000000
 
-Empezando en N=1000, con incrementos de N=N+N*10, hasta N=100000000.
+Empezando en N=10, con incrementos de N=N+N*10, hasta N=100000000.
 
 Sacando una media de tiempo para N=1000 de t ~ 6e-5s, para N=100000000 t ~ 4.6e-1s. 4 órdenes de diferencia de tiempo para 8 órdenes de diferencia de tamaño.
 
@@ -337,7 +337,7 @@ A partir de O(10⁶), el caso de **parallel** toma ventaja y se mantiene así pa
 >
 > `#pragma omp parallel if (M>valor)`
 
-Si se desea ejecutar sin esta versión, se deberá eliminar dicha parte de la cláusula del bucle for en el ficher **pescalar_par3.c**.
+Si se desea ejecutar sin esta versión, se deberá eliminar dicha parte de la cláusula del bucle for en el fichero **pescalar_par3.c**.
 
 Las gráficas, si se generasen en este caso, se superpondrían hasta que superasen el umbral definido en **pescalar_par3.c**, que es del valor = 50000; en nuestro caso sería a partir de vectores de tamaño >= 100000 (según nuestro _script_). Una vez superado ese umbral, las gráficas serían favorables para los casos de multiprogramación, tal y como se puede ver en las gráficas anteriores.
 
@@ -365,6 +365,7 @@ Para el primer apartado, vamos a tomar valores con N = 2000. Los datos de salida
 | Paralela - loop 2   |  114.073157   | 53.373445     | 38.979364     | 30.391888       |
 | Paralela - loop 3   |  98.250049    | 52.256980     | 35.262153     | 26.886549       |
 
+
 En vista de los resultados, vemos que los mejores resultados salen al paralelizar la región más externa del bucle. Esto puede deberse principalmente a la sobrecarga que produce paralelizar los bucles internos, y es que el crecimiento de la gestión de hilos tendrá un crecimiento O(N²) en el bucle intermedio, y O(N³) en el bucle más interno. Al realizar la paralelización fuera, eliminamos este problema y disminuimos las tareas de gestión de ejecución de los hilos por el sistema operativo. Por otro lado, vemos que lanzando más hilos, la mejora se acentúa en todos los casos - a diferencia del caso **serial**, que no varía, pues no depende del grado de la multiprogramación.
 
 Con estos datos, podemos sacar la tabla de aceleración para cada caso:
@@ -377,6 +378,7 @@ Con estos datos, podemos sacar la tabla de aceleración para cada caso:
 | Paralela - loop 3   |  0.85139      | 1,600730161   | 2,37221261    | 3,111196011     |
 
 
+
 > 3.1 ¿Cuál de las tres versiones obtiene peor rendimiento? ¿A qué se debe? ¿Cuál de las tres versiones obtiene el mejor rendimiento?
 > ¿A qué se debe?
 
@@ -385,12 +387,133 @@ Ya ha sido respondido en los comentarios sobre la tabla.
 > 3.2 En base a los resultados, ¿cree que es preferible la paralelización de grano fino (bucle más interno)
 > o de grano grueso (bucle más externo) en otros algoritmos? 
 
-Dependería del caso seguramente, pero en este en concreto, es preferible la paralelización de grano grueso, con tal de eliminar sobrecarga de gestión y ejecución de hilos - por OpenMP primero y por el SO después.
+Dependería del caso seguramente, pero en este en concreto, es preferible la paralelización de grano grueso, con tal de eliminar sobrecarga de gestión y ejecución de hilos - por OpenMP primero y por el SO después. En tal caso, se ve que es el que mayor ganancia tiene - obviando el caso en el que el número de hilos es 1, puesto que la sobrecarga empeora los resultados de la ejecución en serie.
 
 > Tomando como referencia los tiempos de ejecución de la versión serie y el de la mejor versión paralela
 > obtenida anteriormente (la mejor combinación entre las tres versiones de código, y las C posibilidades para
 > el número de hilos paralelos). Tome tiempos en un fichero y realice una gráfica de la evolución del tiempo
 > de ejecución y la aceleración (de la versión paralela vs serie) al ir variando el tamaño de las matrices de NxN
 > para N entre 512+P y 1024+512+P (con incrementos en N de 64).
+
+Ambas gráficas se encuentran en la carpeta **ex3/img/** y los ficheros de datos en **ex3/data/**.
+
+Sobre la variación del tiempo de ejecución:
+
+![](ex3/img/time.png)
+
+Dónde claramente se ve que la tendencia de crecimiento es mucho menor en el caso de ejecución paralela (para número suficiente de tamaño de vector).
+
+Y sobre la variación de la aceleración:
+
+![](ex3/img/speedup.png)
+
+Vemos que en este último caso hay picos que varían y no siguen una tendencia clara - pese a que todos tienen ya de por sí un tamaño considerable -, lo que puede deberse a no haber realizado las pruebas un número suficiente de veces.
+
+
+## Ejercicio 4 - Ejemplo de integración numérica
+
+> Aproximación del valor del número π mediante una integración numérica.
+
+> 4.1 ¿Cuántos rectángulos se utilizan en la versión del programa que se da para realizar la integración numérica?
+
+Si nos fijamos en esta sección de código en, por ejemplo, **pi_serie.c**:
+
+```
+11         int i, n = 100000000;
+...
+17         h = 1.0/(double) n;
+```
+
+Vemos que habrá un total de `n = 100000000` rectángulos, puesto que se corresponde con el número de 'trozos' en los que se dividirá la cuenta.
+
+
+> 4.2 ¿Qué diferencias observa entre estas dos versiones?
+
+La diferencia entre estas dos versiones está en el bucle for que se encuentra dentro de la región paralela indicada con la directiva `#pragma`. 
+
+La versión de **pi_par1.c** suma directamente en la matriz, mientras que **pi_par4.c** utiliza una variable auxiliar llamada `priv_sum` en la que almacena directamente los resultados y luego lo guarda en memoria.
+
+> 4.3 Ejecute las dos versiones recién mencionadas. ¿Se observan diferencias en el resultado obtenido?
+> ¿Y en el rendimiento? Si la respuesta fuera afirmativa, ¿sabría justificar a qué se debe este efecto?
+
+Para múltiples ejecuciones de ambos programas, el tiempo que suele tardar la versión **pi_par1.c** es ~ 1.6s, mientras que para la versión **pi_par4.c** es ~ 0.2s. Para el resultado obtenido no hay diferencias, ambos reportan la misma salida ( 3.141593 ).
+
+Respecto al rendimiento, para poder entender que puede estar pasando, conviene ejecutar el ejemplo **pi_serie.c**, sin regiones paralelas, que obtiene un tiempo ~ 0.35s, casi la mitad que **pi_par1.c**.
+
+Seguramente se trate de un tema de afinidad de memoria, y de acceso al array de datos. Si nos fijamos, la más lenta de las 3 que nos está haciendo plantearnos qué pasa, es la única que utiliza un vector en memoria - compartido - que puede estar haciendo la ejecución más lenta, pese a que el array de datos no es muy grande.
+
+Esto es perfectamente posible, aunque dependerá de cómo esté funcionando la caché del sistema.
+
+Un ejemplo de un problema de este tipo puede encontrarse aquí [OpenMP: sharing arrays between threads | Stackoverflow](https://stackoverflow.com/questions/13906783/openmp-sharing-arrays-between-threads).
+
+> En los programas **pi_par2.c** y **pi_par3.c** se incorporan dos modificaciones distintas sobre la versión 1 para intentar obtener un rendimiento similar a la versión 4.
+>
+> 4.4 Ejecute las versiones paralelas 2 y 3 del programa. ¿Qué ocurre con el resultado y el rendimiento obtenido? ¿Ha ocurrido lo que se esperaba?
+
+Para la versión 2, es decir, **pi_par2.c** el tiempo sigue el mismo orden y valor ~ 1.6s. Sin embargo, en la solución **pi_par3.c** el tiempo mejora hasta ~ 0.2s, estando muy cerca (y seguramente lo esté, ya que podemos despreciar 2 milésimas).
+
+La solución del tercer ejemplo hace una aproximación a través del tamaño de la L3 caché y su tamaño de bloque, asegurándose de que el vector con el que esté trabajando esté alineado en memoria, no causando fallos de acceso en escritura - en la región paralela - ni en lectura - en el código no paralelo del final.
+
+> 4.5 Abra el fichero pi_par3.c y modifique la línea 32 del fichero para que tome los valores fijos 1, 2, 4,
+6, 7, 8, 9, 10 y 12. Ejecute este programa para cada uno de estos valores. ¿Qué ocurre con el rendimiento que se
+observa?
+
+
+|   Valor fijo    | Rendimiento                                                 |
+|---------------  |-----------------------------------------------------------  |
+|        1        |Cache line size: 64 bytes => padding: 1 elementos            |
+|                 |Resultado pi: 3.141593 Tiempo 1.505137                       |
+|                 |                                                             |
+|        2        |Cache line size: 64 bytes => padding: 2 elementos            |
+|                 |Resultado pi: 3.141593 Tiempo 1.504309                       |
+|                 |                                                             |
+|        3        |Cache line size: 64 bytes => padding: 3 elementos            |
+|                 |Resultado pi: 3.141593 Tiempo 1.035094                       |
+|                 |                                                             |
+|        4        |Cache line size: 64 bytes => padding: 4 elementos            |
+|                 |Resultado pi: 3.141593 Tiempo 1.100451                       |
+|                 |                                                             |
+|        6        |Cache line size: 64 bytes => padding: 6 elementos            |
+|                 |Resultado pi: 3.141593 Tiempo 0.654527                       |
+|                 |                                                             |
+|        7        |Cache line size: 64 bytes => padding: 7 elementos            |
+|                 |Resultado pi: 3.141593 Tiempo 0.601083                       |
+|                 |                                                             |
+|        8        |Cache line size: 64 bytes => padding: 8 elementos            |
+|                 |Resultado pi: 3.141593 Tiempo 0.501656                       |
+|                 |                                                             |
+|        9        |Cache line size: 64 bytes => padding: 9 elementos            |
+|                 |Resultado pi: 3.141593 Tiempo 0.520181                       |
+|                 |                                                             |
+|        10       |Cache line size: 64 bytes => padding: 10 elementos           |
+|                 |Resultado pi: 3.141593 Tiempo 0.502008                       |
+|                 |                                                             |
+|        12       |Cache line size: 64 bytes => padding: 12 elementos           |
+|                 |Resultado pi: 3.141593 Tiempo 0.514875                       |
+|                 |                                                             |
+
+
+En base a estos resultados, podemos ver que cuando la caché no se aprovecha completamente, habrá un menor número de accesos posibles y por tanto más choques, ya que la entrada que ofrece la L3 caché no se aprovecha. Algo parecido cuando superamos el tamaño del bloque, lo que provoca accesos a otras posiciones y por tanto fallos de 
+lectura y/o escritura en caché.
+
+> En el fichero **pi_par5.c** se encuentra una versión que intenta resolver el problema de la falsa compartición mediante el uso de variables privadas y la creación de una sección crítica.
+
+> 4.6 Ejecute las versiones 4 y 5 del programa. Explique el efecto de utilizar la directiva _critical_. ¿Qué diferencias de rendimiento de aprecian? ¿A qué se debe este efecto?
+
+Ejecutando la versión 4, obtenemos un tiempo ~ 4.704793s, mientras que para la versión 5 se obtiene un 
+tiempo ~ 0.501837; una diferencia sustancial de un orden de magnitud. Por otro lado, vemos que la solución **pi_par5.c** falla en el cálculo, reportando un valor **π = 2.562125**, algo que definitivamente no es así.
+
+El problema que está ocurriendo es que se están dando condiciones de carrera en el bucle `for`, debido a que la variable que se está modificando en este caso - igual que en los otros ejemplos, pero declarada distintamente - es `x`, puesto que al estar declarada fuera y con la declaración `default(shared)` en la directiva `#pragma`, los hilos están modificando concurrentemente dicha variable, por lo que no se está tratando en valor como debiera.
+
+Ante este caso, se podría hacer `#pragma omp critical` en toda la región (tanto del bucle como en la suma final, donde estaba colocada tal directriz originalmente). Sin embargo, no supone un beneficio de rendimiento, dando resultados similares al de los casos más lentos vistos anteriormente.
+
+> 4.7 Ejecute las veriones 6 y 7 del programa. Explique el efecto de utilizar las directivas utilizadas. ¿Qué diferencias de rendimiento se aprecian? ¿A qué se debe este efecto?
+
+Ejecutando ambas versiones, y viendo que el cálculo del número _pi_ que hacen es correcto, queda observar su tiempo de ejecución. La versión 6 obtiene un tiempo de ejecución ~ 1.45s, mientras que la versión 7 lo hace en un orden de magnitud por debajo ~ 0.5s.
+
+Una posible causa del funcionamiento más lento por parte de la versión 6 es el uso de un array compartido - y que la versión 7 utiliza la cláusula `reduction`. Por otro lado, la versión 6 hace uso de la cláusula `omp for`, lo que según vemos en la web de IBM [#pragma omp for](https://www.ibm.com/support/knowledgecenter/SSGH3R_12.1.0/com.ibm.xlcpp121.aix.doc/compiler_ref/prag_omp_for.html), ésta directiva distribuye el bucle `for` en los hilos que se están lanzando. Sin embargo, el acceso es a memoria, con los problemas que eso conlleva si no se hace en función del tamaño de la entrada de la L3 caché, como se ha podido ver en los primeros apartados de este mismo ejercicio.
+
+
+## Ejercicio 5 - Optimización de programas de cálculo
 
 

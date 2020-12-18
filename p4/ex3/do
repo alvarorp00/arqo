@@ -7,10 +7,10 @@ P=$(( pair % 8 + 1 ))
 stepN=64
 fromN=$(( 512 + P ))
 toN=$(( 1024 + 512 + P ))
-stepC=1
-fromC=(( 1 ))
-toC=(( 16 )) # 16 cores in cluster
-nLoops=5
+C=4 # Mejor número de hilos de las obtenidas anteriormente
+serialOp=1 # Serial mode in mult.c
+parallelOp=4 # Mejor versión de las disponibles (ver switch() en mult.c)
+nLoops=10
 
 info "P = $P\n"
 info "fromN = $fromN\n"
@@ -18,8 +18,17 @@ info "stepN = $stepN\n"
 info "nLoops = $nLoops\n"
 info "toN = $toN\n"
 
-fDAT="pescalar_$N.dat"
-fPNG="pescalar_$N.png"
+fDAT_1="speedup.dat"
+fPNG_1="speedup.png"
+
+fDAT_2="time.dat"
+fPNG_2="time.png"
+
+fDAT=
+fPNG=
+
+xLabel=
+yLabel=
 
 plotall() {
 
@@ -28,17 +37,28 @@ plotall() {
 # llamar a gnuplot para generar el gráfico y pasarle directamente por la entrada
 # estándar el script que está entre "<< END_GNUPLOT" y "END_GNUPLOT"
 gnuplot << END_GNUPLOT
-set title "Matrix multiplication comparison"
-set ylabel "Misses"
+set title "Matrix multiplication time comparison"
+set ylabel "Time (s)"
 set encoding utf8
-set xlabel "Matrix Size"
+set xlabel "Vector size"
 set key right bottom
 set grid
 set term png
-set output "$fPNG"
+set output "$fPNG_2"
 
-plot  "$fDAT" using 1:2 with lines lc "orange" lw 2 dashtype 0 title 'serial_mult', \
-      "$fDAT" using 1:3 with lines lc "blue" lw 2 dashtype 1 title 'parallel_mult'
+plot  "$fDAT_2" using 1:3 with lines lc "blue" lw 2 dashtype 1 title 'parallel mult', \
+      "$fDAT_2" using 1:2 with lines lc "orange" lw 2 dashtype 0 title 'serial mult'
+
+set title "Matrix multiplication speedup"
+set ylabel "Speedup"
+set encoding utf8
+set xlabel "Vector size"
+set key right bottom
+set grid
+set term png
+set output "$fPNG_1"
+
+plot "$fDAT_1" using 1:2 with lines lc "orange" lw 2 title "speedup mult"
 
 replot
 quit
@@ -46,75 +66,53 @@ END_GNUPLOT
 
 }
 
-cacheSizes=(1024 2048 4096 8192) # different cache sizes to be tested
-
-cache_name() {
-  echo "cache_$1.dat"
-}
-
-get_D1mr() {
-  cg_annotate $1 | grep 'PROGRAM TOTALS' | awk '{print $5}' | tr -d ','
-}
-
-get_D1mw() {
-  cg_annotate $1 | grep 'PROGRAM TOTALS' | awk '{print $8}' | tr -d ','
-}
-
-test_cache() { # <exe> <N> <out_file>
-  valgrind --tool=cachegrind \
-    --cachegrind-out-file=$3 \
-    $1 $2
-}
-
 info "running tests ...\n"
 
-# info "cleaning .dat files ...\n"
-# for size in ${cacheSizes[@]}; do
-#   rm -f $(cache_name $size)
-# done
-
-if [ ! -e mult.dat ]; then
-
-  for ((N = fromN ; N <= toN ; N += stepN)); do
+for ((N = fromN ; N <= toN ; N += stepN)); do
 
     info "testing N [$N,$toN] ...\n"
 
-    multSum="0"
-    tmultSum="0"
+    serialTime="0"
+    parallelTime="0"
+    speedup="0"
+
+    serialMultSum="0"
+    parallelMultSum="0"
 
     # time test
     for (( i=0 ; i < $nLoops; i +=1 )); do
-      echo -n "loop=$i; mult@$N: "
-      multTime=$(./mult $N | grep 'time' | awk '{print $3}')
-      echo "${multTime}s"
-      echo -n "loop=$i; tmult@$N: "
-      tmultTime=$(./tmult $N | grep 'time' | awk '{print $3}')
-      echo "${tmultTime}s"
+      echo -n "loop=$i; serialMultTime@$N: "
+      serialMultTime=$(./mult $N $serialOp | grep 'time' | awk '{print $3}')
+      echo "${serialMultTime}s"
+      echo -n "loop=$i; parallelMultTime@$N: "
+      parallelMultTime=$(./mult $N $parallelOp $C | grep 'time' | awk '{print $3}')
+      echo "${parallelMultTime}s"
       
-      multSum=$(calc "$multSum+$multTime")
-      tmultSum=$(calc "$tmultSum+$tmultTime")
+      serialMultSum=$(calc "$serialMultSum+$serialMultTime")
+      parallelMultSum=$(calc "$parallelMultSum+$parallelMultTime")
     done
 
-    multTime=$(calc "$multSum/$nLoops")
-    tmultTime=$(calc "$tmultSum/$nLoops")
+    serialMultTime=$(calc "$serialMultSum/$nLoops")
+    parallelMultTime=$(calc "$parallelMultSum/$nLoops")
 
-    info "slowTimeAvg: $multTime\n"
-    info "fastTimeAvg: $tmultTime\n"
+    info "serialTimeAvg: $serialMultTime\n"
+    info "parallelTimeAvg: $parallelMultTime\n"
 
-    # cache test
-    # test_cache ./mult $N "cachegrind.mult"
-    # test_cache ./tmult $N "cachegrind.tmult"
+    x=$(calc "$serialMultTime/$parallelMultTime")
 
-    # multD1mr=$(get_D1mr cachegrind.mult)
-    # multD1mw=$(get_D1mw cachegrind.mult)
-    # tmultD1mr=$(get_D1mr cachegrind.tmult)
-    # tmultD1mw=$(get_D1mw cachegrind.tmult)
+    echo "Calculated: $x"
 
-    #echo "$multTime $multD1mr $multD1mw $tmultTime $tmultD1mr $tmultD1mw" >> mult.dat
-    echo "$N $multTime $tmultTime" >> mult.dat
-  done
+    if [ $? -ne 0 ]; then
+      speedup="0"
+    else
+      speedup="$x"
+    fi
 
-fi
+    info "speedup: $speedup\n"
+
+    echo "$N $speedup" >> $fDAT_1
+    echo "$N $serialMultTime $parallelMultTime" >> $fDAT_2
+done
 
 plotall
 success "done\n"
