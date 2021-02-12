@@ -36,8 +36,8 @@ pi_par: ex4/pi_par7.c arqo4.c
 	rm -rf pi_par
 	gcc $(FLAGS) $(LIB_DIR) -o $@ $^ $(LIBS)
 
-edgeDetector: edgeDetector.c stb_image_write.h stb_image.h
-	gcc $(FLAGS) -std=gnu99 $(LIB_DIR) -o $@ edgeDetector.c $(LIBS)
+edgeDetector: ex5/edgeDetector.c stb_image_write.h stb_image.h
+	gcc $(FLAGS) -std=gnu99 $(LIB_DIR) -o $@ ex5/edgeDetector.c $(LIBS)
 
 stb_image.h:
 	@echo "Los ficheros de cabecera de stb se deberían descarga automáticamente"

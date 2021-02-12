@@ -66,7 +66,7 @@ int main(int nargs, char **argv)
     }
     // For each image
     // Bucle 0
-    _ncores = omp_get_max_threads();
+    _ncores = omp_get_num_procs();
     _nthreads = _ncores;
     printf("Launching %d threads\n", _nthreads);
     // _nthreads = nargs < _ncores ? nargs : _ncores;

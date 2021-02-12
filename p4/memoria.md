@@ -760,3 +760,26 @@ Donde usamos `# pragma omp parallel ...` para calcular la suma, utilizando `redu
 > 4.  Rellene una tabla con resultados de tiempos y speedup respecto a la versión serie para imágenes de
 >     distintas resoluciones (SD, HD, FHD, UHD-4k, UHD-8k). Añada a su vez una columna que sea la tasa de
 >     fps a la que procesaría el programa
+
+Nota: dentro de modificaciones incluimos también los cambios en las iteraciones de los bucles, que garantizan un uso más eficiente a la memoria.
+
+|   Resolución    | Sin modificaciones        | FPS |    Con modificaciones         | FPS | Acc |
+|---------------  |---------------------------|---- |-----------------------------  |---- |---- |
+|        SD       |Using gaussian denoising...|     | Using gaussian denoising...   |     |     |
+|                 |Tiempo: 0.079618           |14.3 | Tiempo: 0.028650              |34.9 | 2.78|
+|                 |                           |     |                               |     |     |
+|        HD       |Using gaussian denoising...|     | Using gaussian denoising...   |     |     |
+|                 |Tiempo: 0.324600           |3.1  | Tiempo: 0.107033              |9.11 | 3.03|
+|                 |                           |     |                               |     |     |
+|       FHD       |Using gaussian denoising...|     | Using gaussian denoising...   |     |     |
+|                 |Tiempo: 0.737149           |1.36 | Tiempo: 0.240592              |4.15 | 3.06|
+|                 |                           |     |                               |     |     |
+|        4K       |Using gaussian denoising...|     | Using gaussian denoising...   |     |     |
+|                 |Tiempo: 3.891408           |0.26 | Tiempo: 0.946177              |1.06 | 4.11|
+|                 |                           |     |                               |     |     |
+|        8K       |Using gaussian denoising...|     | Using gaussian denoising...   |     |     |
+|                 |Tiempo: 13.922054          |0.72 | Tiempo: 3.773861              |0.26 | 3.69|
+|                 |                           |     |                               |     |     |
+
+
+Observamos que la versión con modificaciones es bastante mejor que la versión de serie, ya que hace acopio de lo estudiado sobre el acceso a matrices y vectores, así como _OpenMP_.

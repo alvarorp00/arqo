@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>memoria.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="arquitectura-de-ordenadores---pr%C3%A1ctica-4">ARQUITECTURA DE ORDENADORES - PRÁCTICA 4</h1>
+<p>Autores:</p>
+<ul>
+<li>Álvaro Rodríguez Palacios</li>
+<li>Javier Romera Llave</li>
+</ul>
+<h2 id="sobre-el-desarrollo-de-la-pr%C3%A1ctica">Sobre el desarrollo de la práctica</h2>
+<p>La práctica será desarrollada en un directorio local, pero las pruebas se ejecutarán en el cluster, por lo que a continuación expondremos - como se pide en el <em>ejercicio 0</em> - la información relativa a la arquitectura de la máquina con la que estamos trabajando.</p>
+<h2 id="ejercicio-0---informaci%C3%B3n-sobre-la-topolog%C3%ADa-del-sistema">Ejercicio 0 - Información sobre la topología del sistema</h2>
+<p>Para ello, ejecutamos:</p>
+<pre class="hljs"><code><div>cat /proc/cpuinfo
+</div></code></pre>
+<p>Y de ahí, podemos observar que el nodo del cluster en el que estamos trabajando
+tiene las siguientes características:</p>
+<ul>
+<li>Procesador AMD Opteron 6128
+<ul>
+<li>8 cores con hyperthreading activado</li>
+<li>8 threads por defecto, 16 con hyperthreading</li>
+<li>3 niveles de Caché:
+<ul>
+<li>Caché L1:
+<ul>
+<li>8 x 64 KB Asociativa de 2 vías INSTRUCCIONES</li>
+<li>8 x 64 KB Asociativa de 2 vías DATOS</li>
+</ul>
+</li>
+<li>Caché L2:
+<ul>
+<li>8 x 512 KB Asociativa de 16 vías Exclusive</li>
+</ul>
+</li>
+<li>Caché L3:
+<ul>
+<li>2 x 6 MB compartida Exclusive</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>TLB de 1024 entradas con páginas de 4KB</li>
+<li>48 bits direccionamiento físico</li>
+<li>48 bits direccionamiento virtual</li>
+</ul>
+</li>
+</ul>
+<h2 id="ejercicio-1---programas-b%C3%A1sicos-de-openmp">Ejercicio 1 - Programas básicos de OpenMP</h2>
+<p>Sobre las preguntas formuladas:</p>
+<blockquote>
+<p>1.1 ¿Se pueden lanzar más <em>threads</em> que <em>cores</em> tenga el sistema? ¿Tiene sentido hacerlo?</p>
+</blockquote>
+<p>Por supuesto que se puede, sólo que serán encoladas por el sistema operativo. Es decir, el máximo que se podrán ejecutar concurrentemente serán las dadas por las funciones ´omp_get_num_procs()´ en los cores, sin <em>hyperthreading</em>, y ´omp_get_max_threads()´ con <em>hyperthreading</em> activo, y esto contando con que en ese momento no se estén lanzando programas distintos - ya que, generalmente, en un sistema operativo siempre hay varios procesos ejecutándose.</p>
+<p>Para poder ver esto con mayor claridad, podríamos ejecutar en sistemas Unix - o Unix compatibles - la instrucción <code>ps -ef</code>, lo que nos mostraría todos los hilos que están o tienen que ejecutarse, a nivel de sistema operativo - y manejados por este. Por lo que, en caso de necesitar un alto grado de multiprogramación, podría ser muy útil hacerlo de esta manera, y dejar que el sistema operativo se encargue de pasarlos a ejecución - aunque, en caso de que haya tareas que consuman pocos ciclos de procesador, quizá esta opción no sea muy eficaz, dado que habría una sobrecarga excesiva para la poca tarea que cada hilo tendría.</p>
+<blockquote>
+<p>1.2 ¿Cuántos <em>threads</em> debería utilizar en los ordenadores del laboratorio? ¿Y en el cluster? ¿Y en su propio equipo?</p>
+</blockquote>
+<p>Disclaimer: no hemos podido utilizar los ordenadores del laboratorio para esta práctica.</p>
+<p>En el cluster, según hemos expuesto anteriormente, y según el retorno de la función <code>omp_get_max_threads()</code>, el máximo número de hilos que tendríamos que ejecutar en paralelo sería 16.</p>
+<p>En el equipo propio en que estamos desarrollando la práctica - localmente, según hemos dicho en la <a href="#sobre-el-desarrollo-de-la-pr%C3%A1ctica">introducción</a> - es un AMD Ryzen 5 2500u, de 4 cores físicos y 8 threads, por lo que deberíamos ejecutarlo con 8 hilos como mucho - siempre que no se den condiciones que forzasen a aumentar o reducir el grado de la multiprogramación, como hemos visto en el apartado anterior.</p>
+<blockquote>
+<p>1.3 Modifique el programa omp1.c para utilizar las tres formas de elegir el número de threads y deduzca la prioridad entre ellas</p>
+</blockquote>
+<p>Tal y como hemos podido ver, la variable de entorno <em>OMP_NUM_THREADS</em> sólo se usa en el valor de <em>nthreads</em> que hay dentro de la región paralela, no trascendiendo fuera de ese bloque; siendo la función <em>omp_set_num_threads(any)</em> la que cambia el valor de la variable <em>nthreads</em> en todo momento - dentro y fuera de las regiones paralelas.</p>
+<p>Por otro lado, tenemos la cláusula <em>num_threads(any)</em> en la línea de la directiva <code>#pragma</code>, cuyo orden de precedencia es mayor que los anteriores, quedando la prioridad de las 3 clásulas definidas como sigue:</p>
+<ol>
+<li>num_threads(any)</li>
+<li>omp_set_num_threads(any)</li>
+<li>OMP_NUM_THREADS = any</li>
+</ol>
+<blockquote>
+<p>1.4 ¿Cómo se comporta OpenMP cuando declaramos una variable privada?</p>
+</blockquote>
+<p>Las variables declaradas como <em>private(var)</em> en la directiva <code>#pragma</code> se comportan, dentro de esa región, como si estuviesen declaradas como <strong>static</strong> en el bloque de código de la región paralela, con la diferencia de que han sido declaradas fuera - ya que <strong>static</strong> significa, entre otras cosas, un almacenamiento estático temporal en un bloque de código (ver <a href="http://scc-forge.lancaster.ac.uk/open/char/lang/static">The Keyword 'Static'</a>).</p>
+<blockquote>
+<p>1.5 ¿Qué ocurre con el valor de una variable privada al comenzar a ejecutarse en la región paralela?</p>
+</blockquote>
+<p>Según el punto anterior, se observa que el valor de la variable al comienzo de una región paralela es equivalente a tener, al principio de ese bloque de código, lo siguiente:</p>
+<pre class="hljs"><code><div>static int a;
+printf(&quot;Valor de a: %d\n&quot;, a);
+</div></code></pre>
+<p>Es decir, una variable <strong>sin</strong> inicializar.</p>
+<blockquote>
+<p>1.6 ¿Qué ocurre con el valor de una variable privada al finalizar la región paralela?</p>
+</blockquote>
+<p>Tal y como hemos expuesto en el apartado anterior, el valor de la variable privada es perecedera, siendo sus modificaciones invisibles para el código externo, por lo que al finalizar el bloque de código el valor permanece intacto.</p>
+<blockquote>
+<p>1.7 ¿Ocurre lo mismo con las variables públicas?</p>
+</blockquote>
+<p>No, ya que estas se comportan como una variable 'normal', toda modificación que sufra antes, durante y después de la/las región/es paralela(s) se conservará para el/los siguiente(s) bloque(s) de código.</p>
+<h2 id="ejercicio-2---paralelizar-el-producto-escalar">Ejercicio 2 - Paralelizar el producto escalar</h2>
+<p>Sobre las preguntas propuestas:</p>
+<blockquote>
+<p>2.1 Ejecute la versión serie y entienda cuál debe ser el resultado para diferentes tamaños de vector.</p>
+</blockquote>
+<p>No hay demasiada variación de tiempo para incrementos de hasta 3 órdenes de magnitud en la directiva <code>#define M 10...0ull</code>, variando entre órdenes de 10⁶ y 10⁸; sin pasarnos del máximo que soporta un número en coma flotante, puesto que habría overflow, con O(N) ya que son vectores lineales, por lo que el crecimiento y la diferencia de tiempo tiende a ser lineal - ~ del orden de 10³, razonable para la variación de tamaño de ambos vectores.</p>
+<p>Para un tamaño de vector <code>M=10000000</code> obtenemos:</p>
+<pre class="hljs"><code><div>Resultado: 10000000.000000
+Tiempo: 0.045901
+</div></code></pre>
+<p>Para un tamaño de vector <code>M=10000</code> obtenemos:</p>
+<pre class="hljs"><code><div>Resultado: 10000.000000
+Tiempo: 0.000066
+</div></code></pre>
+<p>Para un tamaño de vector <code>M=10</code> obtenemos:</p>
+<pre class="hljs"><code><div>Resultado: 10.000000
+Tiempo: 0.000000
+</div></code></pre>
+<p>En el último caso, vemos que es despreciable; para los demás - los otros dos - observamos una tendencia razonable, puesto que si aumentamos el tamaño del vector en O(10³), el tiempo crece en ese mismo orden. Sobre el resultado calculado, también es el correcto (coincide).</p>
+<blockquote>
+<p>2.2 Ejecute el código paralelizado con el pragma openmp y conteste en la memoria a las siguientes preguntas:</p>
+<ul>
+<li>¿Es correcto el resultado?</li>
+<li>¿Qué puede estar pasando?</li>
+</ul>
+</blockquote>
+<p>Para un tamaño de vector <code>M=10000000</code> obtenemos:</p>
+<pre class="hljs"><code><div>Resultado: 3766997.000000
+Tiempo: 0.508582
+</div></code></pre>
+<p>Para un tamaño de vector <code>M=10000</code> obtenemos:</p>
+<pre class="hljs"><code><div>Resultado: 3417.000000
+Tiempo: 0.000540
+</div></code></pre>
+<p>Para un tamaño de vector <code>M=10</code> obtenemos:</p>
+<pre class="hljs"><code><div>Resultado: 8.000000
+Tiempo: 0.000082
+</div></code></pre>
+<p>Como podemos observar, hay una disparidad de resultados - sin embargo, el tiempo parece ser algo razonable, teniendo en cuenta también lo expuesto <a href="#ejercicio-1---programas-b%C3%A1sicos-de-openmp">arriba</a> - que nos hacen ver que los cálculos no están siendo acertados. La razón de esto es la concurrencia, y es que el programa base <em>pescalar_par1.c</em> no protege las variables en lectura y escritura, por lo que en la instrucción:</p>
+<p><code>sum = sum + A[k]*B[k]</code></p>
+<p>se están utilizando valores de <code>sum</code> que pueden no haber sido actualizados aún por esa misma instrucción - per de otro hilo. Con esto, en los siguientes puntos veremos cómo resolverlo.</p>
+<blockquote>
+<p>2.3 Modifique el código anterior y denomine el programa pescalar_par2. Esta versión deber dar el resultado
+correcto utilizando donde corresponda alguno de los siguientes pragmas</p>
+<p>#pragma omp critical</p>
+<p>#pragma omp atomic</p>
+<p>¿Puede resolverse con ambas directivas? Indique las modificaciones realizadas en cada caso.</p>
+<p>¿Cuál es la opción elegida y por qué?</p>
+</blockquote>
+<p>Vamos a repetir la prueba sólo para un caso, el de <code>M=10000</code>.</p>
+<p>Primero, con la solución de <code>#pragma omp critical</code>:</p>
+<pre class="hljs"><code><div>Resultado: 10000.000000
+Tiempo: 0.003124
+</div></code></pre>
+<p>Como vemos, ahora el resultado sí es el esperado.</p>
+<p>Probando con la directiva <code>#pragma omp atomic</code> nos encontramos con un error, debido a que ésta sólo permite ser utilizada en los siguientes casos (ver: <a href="https://scc.ustc.edu.cn/zlsc/sugon/intel/compiler_c/main_cls/cref_cls/common/cppref_pragma_omp_atomic.htm">omp atomic</a>):</p>
+<pre class="hljs"><code><div>x binop= expr
+x++
+++x
+x--
+--x
+</div></code></pre>
+<p>Para solucionar esto, hay que reescribir la siguiente expresión:</p>
+<p><code>sum = sum + A[k]*B[k];</code> --&gt; <code>sum += A[k]*B[k];</code></p>
+<p>Siendo el resultado el siguiente:</p>
+<pre class="hljs"><code><div>Resultado: 10000.000000
+Tiempo: 0.001886
+</div></code></pre>
+<p>Estas dos soluciones requieren poner la directiva en la línea anterior a la operación, dentro del bucle <em>for</em>.</p>
+<p>Hemos elegido <code>atomic</code> antes que <code>critical</code> por una razón, y es que, como se puede ver en la referencia que hemos dejado arriba, <code>atomic</code> hace referencia a un acceso a una parte concreta de memoria, mientras que <code>critical</code> se refiere a un bloque entero (ver <a href="https://scc.ustc.edu.cn/zlsc/tc4600/intel/2015.1.133/compiler_c/GUID-0C42D422-7CF5-44A7-AC12-43DF3CBD65A1.htm">omp critical</a>); siendo más precisa la solución con <code>atomic</code> en este caso, pese a que tenga que modificarse la expresión.</p>
+<p>La idea aquí de <code>#pragma omp atomic</code> es similar a la de los tipos <code>atomic</code> en <strong>C</strong> (ver <a href="http://scc-forge.lancaster.ac.uk/open/char/threads/atomic">Atomics</a>)</p>
+<blockquote>
+<p>2.4 Modifique el código anterior y denomine el programa resultante pescalar_par3. Esta versión debe dar el
+resultado correcto utilizando donde corresopnda alguno de los siguientes pragmas.</p>
+<p>#pragma omp parallel for reduction</p>
+<ul>
+<li>Comparando con el punto anterior. ¿Cuál es la opción elegida y por qué?</li>
+</ul>
+</blockquote>
+<p>Además de las anteriores,  posible solución sería declarando la directiva #pragma como sigue:</p>
+<pre class="hljs"><code><div>#pragma omp parallel for reduction(+:sum)
+</div></code></pre>
+<p>con el siguiente resultado:</p>
+<pre class="hljs"><code><div>Resultado: 10000.000000
+Tiempo: 0.000105
+</div></code></pre>
+<p>Aquí, vemos que hemos usado la cláusula <code>reduction</code>, específica para regiones paralelas de compartición de datos, que tiene que ser usada junto con <code>parallel for</code> - no aisladamente, ya que sería ignorada por el compilador y tendríamos una zona de acceso inseguro a los datos -, indicando los términos de la operación (aquí: '+:sum').</p>
+<p>Respecto al tiempo necesitado para ejecutarse, vemos que obtiene un tiempo de ejecución de 1 orden de magnitud inferior respecto a <code>critical</code> y <code>atomic</code>, puesto que en el caso de la directiva <code>#pragma omp atomic</code> requiere que cada <em>thread</em> se sincronice, por lo que se tienen que serializar los <em>threads</em>; por otro lado, <code>#pragma omp for reduction</code> utiliza algoritmos de reducción en paralelo (ver: <a href="https://courses.cs.washington.edu/courses/csep506/11sp/slides/Lecture-6-Parallel-Patterns.pdf">Parallel patterns reduce &amp; scan</a>)</p>
+<p>La principal ventaja de estos algoritmos de reducción es que cada <em>thread</em> acumula su propia suma parcial, y finalmente estos valores se suman conjuntamente, por lo que no requieren de serializar los <em>threads</em>.</p>
+<p>Así que, con esto, nuestra solución para <strong>pescalar_par3.c</strong> es utilizar la directiva <code>#pragma omp for reduction(+:sum)</code></p>
+<blockquote>
+<p>2.6 Análisis de tiempos de ejecución</p>
+</blockquote>
+<p>Vamos a utilizar la versión <strong>pescalar_serie.c</strong> junto con su versión paralela <strong>pescalar_par3.c</strong> en este caso - la que nosotros consideramos como mejor solución.</p>
+<p>Los tamaños del vector serán los siguientes:</p>
+<p>10 -&gt; 100 -&gt; 1000 -&gt; 10000 -&gt; 100000 -&gt; 10000000 -&gt; 100000000</p>
+<p>Empezando en N=10, con incrementos de N=N+N*10, hasta N=100000000.</p>
+<p>Sacando una media de tiempo para N=1000 de t ~ 6e-5s, para N=100000000 t ~ 4.6e-1s. 4 órdenes de diferencia de tiempo para 8 órdenes de diferencia de tamaño.</p>
+<p>Estos datos son previos, y sólo nos van a servir para poder justificar, a priori, los tamaños de vector elegido. Los datos finales se exponen a continuación.</p>
+<p><strong>Las gráficas generadas se encuentran en la carpeta ex2/img_a/ (comparativa de serial y parallel) y ex2/img_b/ (speedup). Los datos desde los que se generan están en la carpeta ex2/data_a/ y ex2/data_b/</strong></p>
+<p>El nombre de las imágenes tiene un número, que hace referencia al tamaño del vector que se ha ejecutado en ese caso, y en la gráfica se va incrementando en el eje horizontal el número de hilos que se lanzan (aunque en el caso de <em>serial</em> siempre sea <strong>0</strong>). Se han generado entre 1 y 32 - puesto que con hyperthreading hay 16 cores, 2 * 16 = 32 - y una variación de tamaño de vector de entre 10 hasta 10000000 en incrementos de (N*10), obteniendo 6 tamaños distintos de vector. Para cada tamaño de vector y cada número de hilos se toman 20 datos, y se hace la media de todos ellos.</p>
+<p>Primero, observamos las gráficas en que se representan ambas opciones - serial y parallel.</p>
+<p>Para N=10 se tiene:</p>
+<p><img src="ex2/img_a/pescalar_10.png" alt=""></p>
+<p>Para N=100 se tiene:</p>
+<p><img src="ex2/img_a/pescalar_100.png" alt=""></p>
+<p>Para N=1000 se tiene:</p>
+<p><img src="ex2/img_a/pescalar_1000.png" alt=""></p>
+<p>Para N=10000 se tiene:</p>
+<p><img src="ex2/img_a/pescalar_10000.png" alt=""></p>
+<p>Para N=100000 se tiene:</p>
+<p><img src="ex2/img_a/pescalar_100000.png" alt=""></p>
+<p>Para N=1000000 se tiene:</p>
+<p><img src="ex2/img_a/pescalar_1000000.png" alt=""></p>
+<p>Para N=10000000 se tiene:</p>
+<p><img src="ex2/img_a/pescalar_10000000.png" alt=""></p>
+<p>En ellas se puede ver que según se va incrementando el tamaño del vector, es mejor la opción de multiprogramación, al igual que con el número de threads lanzados. La mejor opción para un grado alto de multiprogramación es tener tamaños grandes de vectores con un número alto de threads.</p>
+<p>Ahora veamos las gráficas con la aceleración conseguida - observando la consecuencia lógica de las gráficas anteriores.</p>
+<p>Para N=10 se tiene:</p>
+<p><img src="ex2/img_b/pescalar_10.png" alt=""></p>
+<p>Para N=100 se tiene:</p>
+<p><img src="ex2/img_b/pescalar_100.png" alt=""></p>
+<p>Para N=1000 se tiene:</p>
+<p><img src="ex2/img_b/pescalar_1000.png" alt=""></p>
+<p>Para N=10000 se tiene:</p>
+<p><img src="ex2/img_b/pescalar_10000.png" alt=""></p>
+<p>Para N=100000 se tiene:</p>
+<p><img src="ex2/img_b/pescalar_100000.png" alt=""></p>
+<p>Para N=1000000 se tiene:</p>
+<p><img src="ex2/img_b/pescalar_1000000.png" alt=""></p>
+<p>Para N=10000000 se tiene:</p>
+<p><img src="ex2/img_b/pescalar_10000000.png" alt=""></p>
+<p>Sobre las siguientes cuestiones:</p>
+<blockquote>
+<p>En términos del tamaño de los vectores, ¿compensa siempre lanzar hilos para realizar el trabajo en paralelo, o hay casos en los que no?</p>
+<p>Si no compensa siempre, ¿en qué casos no compensa y por qué?</p>
+</blockquote>
+<p>Siempre que se trabajen con tamaños muy reducidos de vectores, no compensa, pues se genera una sobrecarga de gestión de hilos que supera al tiempo que pueden ganar en la ejecución - y en el peor de los casos, si son muchos hilos, harán que el sistema operativo tarde más en ejecutar todos - por lo que no sería un caso en el que favoreciese eso.</p>
+<blockquote>
+<p>¿Se mejora siempre el rendimiento al aumentar el número de hilos a trabajar?</p>
+</blockquote>
+<p>No, ya que para casos favorables - tamaños de datos grandes -, si generamos un número de hilos muy superior al máximo que puedan ejecutarse en paralelo, lo que se consigue es que el sistema operativo tenga que encargarse de lanzarlos, pudiendo ralentizar la ejecución debido a la sobrecarga añadida.</p>
+<p>Esto se observa claramente en las gráficas de 10 &lt; N &lt; 10000, donde por cada más hilos que se lanzan, más tiempo tarda para un mismo tamaño de vector.</p>
+<blockquote>
+<p>Si no fuera así, ¿a qué se debe este efecto?</p>
+</blockquote>
+<p>Ya ha sido contestado en el apartado anterior</p>
+<blockquote>
+<p>Valore si existe algún tamaño de vector a partir del cual el comportamiento de la aceleración va a ser muy diferente al obtenido en la gráfica.</p>
+</blockquote>
+<p>Se puede pensar que para vectores de órdenes de magnitud suficientes, puesto que la gráfica no se ve clara, y por más que se repitan las pruebas, para O(10¹) - O(10⁴), siguen siendo favorables los casos de <strong>serial</strong>.</p>
+<p>Sin embargo, para O(10⁵) la gráfica, con pocos hilos, muestra mejores resultados para <strong>parallel</strong>, mientras que para muchos hilos no.</p>
+<p>A partir de O(10⁶), el caso de <strong>parallel</strong> toma ventaja y se mantiene así para tamaños de vector más grandes (nótese el caso de O(10⁷), que obtiene un resultado más estable el en el orden inferior).</p>
+<blockquote>
+<p>Modifique el código de la versión paralela para que sólo se ejecute en paralelo cuando el tamaño de vector sea lo suficientemente grande y justifique la ejecución en paralelo. Para ello utilice la cláusula <code>if(expression)</code> dentro del pragma:</p>
+<p><code>#pragma omp parallel if (M&gt;valor)</code></p>
+</blockquote>
+<p>Si se desea ejecutar sin esta versión, se deberá eliminar dicha parte de la cláusula del bucle for en el fichero <strong>pescalar_par3.c</strong>.</p>
+<p>Las gráficas, si se generasen en este caso, se superpondrían hasta que superasen el umbral definido en <strong>pescalar_par3.c</strong>, que es del valor = 50000; en nuestro caso sería a partir de vectores de tamaño &gt;= 100000 (según nuestro <em>script</em>). Una vez superado ese umbral, las gráficas serían favorables para los casos de multiprogramación, tal y como se puede ver en las gráficas anteriores.</p>
+<h2 id="ejercicio-3---paralelizar-la-multiplicaci%C3%B3n-de-matrices">Ejercicio 3 - Paralelizar la multiplicación de matrices</h2>
+<p>Para ejecutar esta parte, hay que ejecutar:</p>
+<p><code>make mult; ./mult &lt;N&gt; &lt;option[1,2,3,4]&gt; &lt;#hilos (si option &gt; 1)&gt;</code></p>
+<p>donde <em>N</em> hace referencia al tamaño de la matriz cuadrada y <em>option</em> a la opción que se ejecutará:</p>
+<ol>
+<li>Sin paralelizar</li>
+<li>Bucle más interno</li>
+<li>Bucle intermedio</li>
+<li>Bucle externo</li>
+</ol>
+<p>Primero, completamos la tabla de tiempos, después la de aceleración. Para el caso de 'Serie' hemos tomado 4 medidas y realizado la media que daba en la salida de estas. Para las demás, hemos tomado 5 medidas de las mismas.</p>
+<p>Para el primer apartado, vamos a tomar valores con N = 2000. Los datos de salida del programa para las diferentes versiones es la siguiente:</p>
+<table>
+<thead>
+<tr>
+<th>Versión \ #Hilos</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Serie</td>
+<td>83.649324</td>
+<td>83.649324</td>
+<td>83.649324</td>
+<td>83.649324</td>
+</tr>
+<tr>
+<td>Paralela - loop 1</td>
+<td>102.083016</td>
+<td>57.335779</td>
+<td>45.732592</td>
+<td>39.902324</td>
+</tr>
+<tr>
+<td>Paralela - loop 2</td>
+<td>114.073157</td>
+<td>53.373445</td>
+<td>38.979364</td>
+<td>30.391888</td>
+</tr>
+<tr>
+<td>Paralela - loop 3</td>
+<td>98.250049</td>
+<td>52.256980</td>
+<td>35.262153</td>
+<td>26.886549</td>
+</tr>
+</tbody>
+</table>
+<p>En vista de los resultados, vemos que los mejores resultados salen al paralelizar la región más externa del bucle. Esto puede deberse principalmente a la sobrecarga que produce paralelizar los bucles internos, y es que el crecimiento de la gestión de hilos tendrá un crecimiento O(N²) en el bucle intermedio, y O(N³) en el bucle más interno. Al realizar la paralelización fuera, eliminamos este problema y disminuimos las tareas de gestión de ejecución de los hilos por el sistema operativo. Por otro lado, vemos que lanzando más hilos, la mejora se acentúa en todos los casos - a diferencia del caso <strong>serial</strong>, que no varía, pues no depende del grado de la multiprogramación.</p>
+<p>Con estos datos, podemos sacar la tabla de aceleración para cada caso:</p>
+<table>
+<thead>
+<tr>
+<th>Versión \ #Hilos</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Serie</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Paralela - loop 1</td>
+<td>0.82</td>
+<td>1,458937603</td>
+<td>1,829096501</td>
+<td>2,096352182</td>
+</tr>
+<tr>
+<td>Paralela - loop 2</td>
+<td>0.733</td>
+<td>1,567246109</td>
+<td>2,145989965</td>
+<td>2,752356945</td>
+</tr>
+<tr>
+<td>Paralela - loop 3</td>
+<td>0.85139</td>
+<td>1,600730161</td>
+<td>2,37221261</td>
+<td>3,111196011</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>3.1 ¿Cuál de las tres versiones obtiene peor rendimiento? ¿A qué se debe? ¿Cuál de las tres versiones obtiene el mejor rendimiento?
+¿A qué se debe?</p>
+</blockquote>
+<p>Ya ha sido respondido en los comentarios sobre la tabla.</p>
+<blockquote>
+<p>3.2 En base a los resultados, ¿cree que es preferible la paralelización de grano fino (bucle más interno)
+o de grano grueso (bucle más externo) en otros algoritmos?</p>
+</blockquote>
+<p>Dependería del caso seguramente, pero en este en concreto, es preferible la paralelización de grano grueso, con tal de eliminar sobrecarga de gestión y ejecución de hilos - por OpenMP primero y por el SO después. En tal caso, se ve que es el que mayor ganancia tiene - obviando el caso en el que el número de hilos es 1, puesto que la sobrecarga empeora los resultados de la ejecución en serie.</p>
+<blockquote>
+<p>Tomando como referencia los tiempos de ejecución de la versión serie y el de la mejor versión paralela
+obtenida anteriormente (la mejor combinación entre las tres versiones de código, y las C posibilidades para
+el número de hilos paralelos). Tome tiempos en un fichero y realice una gráfica de la evolución del tiempo
+de ejecución y la aceleración (de la versión paralela vs serie) al ir variando el tamaño de las matrices de NxN
+para N entre 512+P y 1024+512+P (con incrementos en N de 64).</p>
+</blockquote>
+<p>Ambas gráficas se encuentran en la carpeta <strong>ex3/img/</strong> y los ficheros de datos en <strong>ex3/data/</strong>.</p>
+<p>Sobre la variación del tiempo de ejecución:</p>
+<p><img src="ex3/img/time.png" alt=""></p>
+<p>Dónde claramente se ve que la tendencia de crecimiento es mucho menor en el caso de ejecución paralela (para número suficiente de tamaño de vector).</p>
+<p>Y sobre la variación de la aceleración:</p>
+<p><img src="ex3/img/speedup.png" alt=""></p>
+<p>Vemos que en este último caso hay picos que varían y no siguen una tendencia clara - pese a que todos tienen ya de por sí un tamaño considerable -, lo que puede deberse a no haber realizado las pruebas un número suficiente de veces.</p>
+<h2 id="ejercicio-4---ejemplo-de-integraci%C3%B3n-num%C3%A9rica">Ejercicio 4 - Ejemplo de integración numérica</h2>
+<blockquote>
+<p>Aproximación del valor del número π mediante una integración numérica.</p>
+</blockquote>
+<blockquote>
+<p>4.1 ¿Cuántos rectángulos se utilizan en la versión del programa que se da para realizar la integración numérica?</p>
+</blockquote>
+<p>Si nos fijamos en esta sección de código en, por ejemplo, <strong>pi_serie.c</strong>:</p>
+<pre class="hljs"><code><div>11         int i, n = 100000000;
+...
+17         h = 1.0/(double) n;
+</div></code></pre>
+<p>Vemos que habrá un total de <code>n = 100000000</code> rectángulos, puesto que se corresponde con el número de 'trozos' en los que se dividirá la cuenta.</p>
+<blockquote>
+<p>4.2 ¿Qué diferencias observa entre estas dos versiones?</p>
+</blockquote>
+<p>La diferencia entre estas dos versiones está en el bucle for que se encuentra dentro de la región paralela indicada con la directiva <code>#pragma</code>.</p>
+<p>La versión de <strong>pi_par1.c</strong> suma directamente en la matriz, mientras que <strong>pi_par4.c</strong> utiliza una variable auxiliar llamada <code>priv_sum</code> en la que almacena directamente los resultados y luego lo guarda en memoria.</p>
+<blockquote>
+<p>4.3 Ejecute las dos versiones recién mencionadas. ¿Se observan diferencias en el resultado obtenido?
+¿Y en el rendimiento? Si la respuesta fuera afirmativa, ¿sabría justificar a qué se debe este efecto?</p>
+</blockquote>
+<p>Para múltiples ejecuciones de ambos programas, el tiempo que suele tardar la versión <strong>pi_par1.c</strong> es ~ 1.6s, mientras que para la versión <strong>pi_par4.c</strong> es ~ 0.2s. Para el resultado obtenido no hay diferencias, ambos reportan la misma salida ( 3.141593 ).</p>
+<p>Respecto al rendimiento, para poder entender que puede estar pasando, conviene ejecutar el ejemplo <strong>pi_serie.c</strong>, sin regiones paralelas, que obtiene un tiempo ~ 0.35s, casi la mitad que <strong>pi_par1.c</strong>.</p>
+<p>Seguramente se trate de un tema de afinidad de memoria, y de acceso al array de datos. Si nos fijamos, la más lenta de las 3 que nos está haciendo plantearnos qué pasa, es la única que utiliza un vector en memoria - compartido - que puede estar haciendo la ejecución más lenta, pese a que el array de datos no es muy grande.</p>
+<p>Esto es perfectamente posible, aunque dependerá de cómo esté funcionando la caché del sistema.</p>
+<p>Un ejemplo de un problema de este tipo puede encontrarse aquí <a href="https://stackoverflow.com/questions/13906783/openmp-sharing-arrays-between-threads">OpenMP: sharing arrays between threads | Stackoverflow</a>.</p>
+<blockquote>
+<p>En los programas <strong>pi_par2.c</strong> y <strong>pi_par3.c</strong> se incorporan dos modificaciones distintas sobre la versión 1 para intentar obtener un rendimiento similar a la versión 4.</p>
+<p>4.4 Ejecute las versiones paralelas 2 y 3 del programa. ¿Qué ocurre con el resultado y el rendimiento obtenido? ¿Ha ocurrido lo que se esperaba?</p>
+</blockquote>
+<p>Para la versión 2, es decir, <strong>pi_par2.c</strong> el tiempo sigue el mismo orden y valor ~ 1.6s. Sin embargo, en la solución <strong>pi_par3.c</strong> el tiempo mejora hasta ~ 0.2s, estando muy cerca (y seguramente lo esté, ya que podemos despreciar 2 milésimas).</p>
+<p>La solución del tercer ejemplo hace una aproximación a través del tamaño de la L3 caché y su tamaño de bloque, asegurándose de que el vector con el que esté trabajando esté alineado en memoria, no causando fallos de acceso en escritura - en la región paralela - ni en lectura - en el código no paralelo del final.</p>
+<blockquote>
+<p>4.5 Abra el fichero pi_par3.c y modifique la línea 32 del fichero para que tome los valores fijos 1, 2, 4,
+6, 7, 8, 9, 10 y 12. Ejecute este programa para cada uno de estos valores. ¿Qué ocurre con el rendimiento que se
+observa?</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Valor fijo</th>
+<th>Rendimiento</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Cache line size: 64 bytes =&gt; padding: 1 elementos</td>
+</tr>
+<tr>
+<td></td>
+<td>Resultado pi: 3.141593 Tiempo 1.505137</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Cache line size: 64 bytes =&gt; padding: 2 elementos</td>
+</tr>
+<tr>
+<td></td>
+<td>Resultado pi: 3.141593 Tiempo 1.504309</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Cache line size: 64 bytes =&gt; padding: 3 elementos</td>
+</tr>
+<tr>
+<td></td>
+<td>Resultado pi: 3.141593 Tiempo 1.035094</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Cache line size: 64 bytes =&gt; padding: 4 elementos</td>
+</tr>
+<tr>
+<td></td>
+<td>Resultado pi: 3.141593 Tiempo 1.100451</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Cache line size: 64 bytes =&gt; padding: 6 elementos</td>
+</tr>
+<tr>
+<td></td>
+<td>Resultado pi: 3.141593 Tiempo 0.654527</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>7</td>
+<td>Cache line size: 64 bytes =&gt; padding: 7 elementos</td>
+</tr>
+<tr>
+<td></td>
+<td>Resultado pi: 3.141593 Tiempo 0.601083</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>8</td>
+<td>Cache line size: 64 bytes =&gt; padding: 8 elementos</td>
+</tr>
+<tr>
+<td></td>
+<td>Resultado pi: 3.141593 Tiempo 0.501656</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>9</td>
+<td>Cache line size: 64 bytes =&gt; padding: 9 elementos</td>
+</tr>
+<tr>
+<td></td>
+<td>Resultado pi: 3.141593 Tiempo 0.520181</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>10</td>
+<td>Cache line size: 64 bytes =&gt; padding: 10 elementos</td>
+</tr>
+<tr>
+<td></td>
+<td>Resultado pi: 3.141593 Tiempo 0.502008</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>12</td>
+<td>Cache line size: 64 bytes =&gt; padding: 12 elementos</td>
+</tr>
+<tr>
+<td></td>
+<td>Resultado pi: 3.141593 Tiempo 0.514875</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>En base a estos resultados, podemos ver que cuando la caché no se aprovecha completamente, habrá un menor número de accesos posibles y por tanto más choques, ya que la entrada que ofrece la L3 caché no se aprovecha. Algo parecido cuando superamos el tamaño del bloque, lo que provoca accesos a otras posiciones y por tanto fallos de
+lectura y/o escritura en caché.</p>
+<blockquote>
+<p>En el fichero <strong>pi_par5.c</strong> se encuentra una versión que intenta resolver el problema de la falsa compartición mediante el uso de variables privadas y la creación de una sección crítica.</p>
+</blockquote>
+<blockquote>
+<p>4.6 Ejecute las versiones 4 y 5 del programa. Explique el efecto de utilizar la directiva <em>critical</em>. ¿Qué diferencias de rendimiento de aprecian? ¿A qué se debe este efecto?</p>
+</blockquote>
+<p>Ejecutando la versión 4, obtenemos un tiempo ~ 4.704793s, mientras que para la versión 5 se obtiene un
+tiempo ~ 0.501837; una diferencia sustancial de un orden de magnitud. Por otro lado, vemos que la solución <strong>pi_par5.c</strong> falla en el cálculo, reportando un valor <strong>π = 2.562125</strong>, algo que definitivamente no es así.</p>
+<p>El problema que está ocurriendo es que se están dando condiciones de carrera en el bucle <code>for</code>, debido a que la variable que se está modificando en este caso - igual que en los otros ejemplos, pero declarada distintamente - es <code>x</code>, puesto que al estar declarada fuera y con la declaración <code>default(shared)</code> en la directiva <code>#pragma</code>, los hilos están modificando concurrentemente dicha variable, por lo que no se está tratando en valor como debiera.</p>
+<p>Ante este caso, se podría hacer <code>#pragma omp critical</code> en toda la región (tanto del bucle como en la suma final, donde estaba colocada tal directriz originalmente). Sin embargo, no supone un beneficio de rendimiento, dando resultados similares al de los casos más lentos vistos anteriormente.</p>
+<blockquote>
+<p>4.7 Ejecute las veriones 6 y 7 del programa. Explique el efecto de utilizar las directivas utilizadas. ¿Qué diferencias de rendimiento se aprecian? ¿A qué se debe este efecto?</p>
+</blockquote>
+<p>Ejecutando ambas versiones, y viendo que el cálculo del número <em>pi</em> que hacen es correcto, queda observar su tiempo de ejecución. La versión 6 obtiene un tiempo de ejecución ~ 1.45s, mientras que la versión 7 lo hace en un orden de magnitud por debajo ~ 0.5s.</p>
+<p>Una posible causa del funcionamiento más lento por parte de la versión 6 es el uso de un array compartido - y que la versión 7 utiliza la cláusula <code>reduction</code>. Por otro lado, la versión 6 hace uso de la cláusula <code>omp for</code>, lo que según vemos en la web de IBM <a href="https://www.ibm.com/support/knowledgecenter/SSGH3R_12.1.0/com.ibm.xlcpp121.aix.doc/compiler_ref/prag_omp_for.html">#pragma omp for</a>, ésta directiva distribuye el bucle <code>for</code> en los hilos que se están lanzando. Sin embargo, el acceso es a memoria, con los problemas que eso conlleva si no se hace en función del tamaño de la entrada de la L3 caché, como se ha podido ver en los primeros apartados de este mismo ejercicio.</p>
+<h2 id="ejercicio-5---optimizaci%C3%B3n-de-programas-de-c%C3%A1lculo">Ejercicio 5 - Optimización de programas de cálculo</h2>
+<p><b>Preguntas:</b></p>
+<blockquote>
+<ol>
+<li>
+<p>El programa incluye un bucle más externo que itera sobre los argumentos aplicando los algoritmos a
+cada uno de los argumentos (señalado como Bucle 0). ¿Es este bucle el óptimo para ser paralelizado?</p>
+<p>a. ¿Qué sucede si se pasan menos argumentos que número de cores?</p>
+<p>b. Suponga que va a procesar imágenes de un telescopio espacial que ocupan hasta 6GB cada
+una, ¿es la opción adecuada? Comente cuanta memoria consume cada hilo en función del
+tamaño en pixeles de la imagen de entrada</p>
+</li>
+</ol>
+</blockquote>
+<p>Para paralelizar el bucle más externo, podríamos fijar el número de threads a lanzar en función de si el número de argumentos es superior al número de cores. En caso positivo, se lanzarán tantos hilos como cores haya, en caso contrario, tantos hilos como argumentos se hayan pasado. Veamos esta solución:</p>
+<pre class="hljs"><code><div>_ncores = omp_get_max_threads();
+_nthreads = nargs &lt; _ncores ? nargs : _ncores;
+omp_set_num_threads(_nthreads);
+#pragma omp parallel for ...
+</div></code></pre>
+<p>Todavía no vamos a realizar medidas de rendimiento en este punto.</p>
+<p>Por otro lado, es interesante ver cuánta memoria puede llegar a estar consumiendo cada hilo, aunque haremos la ejecución normal, que sería extrapolable:</p>
+<pre class="hljs"><code><div>❯ valgrind --leak-check=full ./edgeDetector ex5/src_img/SD.jpg
+</div></code></pre>
+<p>La imagen SD pesa ~ 55KB, por lo que nos servirá para aproximar hasta 6GB (10⁵ órdenes de diferencia). El resultado es de ~ 2 * 10⁶ Bytes ~ 2MB.</p>
+<pre class="hljs"><code><div>❯ valgrind --leak-check=full ./edgeDetector ex5/src_img/8K.jpg
+</div></code></pre>
+<p>La imagen 8K pesa ~ 5.4MB. Al ejecutar el programa para esta imagen, la salida es de 331,784,053 bytes ~ 330 MB.</p>
+<p>Siguiendo estos dos ejemplos, y estimando la memoria necesitada para procesar ese tamaño de imágenes, se necesitarían ~ 200 - 300 GB de memoria, por lo que la solución podría no ser adecuada, necesitando cada hilo un tamaño de dicha magnitud, podrían llegar a acabar con la memoria del sistema.</p>
+<blockquote>
+<ol start="2">
+<li>
+<p>Durante la práctica anterior, observamos que el orden de acceso a los datos es importante. ¿Hay algún
+bucle que esté accediendo en un orden subóptimo a los datos? Corríjalo en tal caso.</p>
+<p>a. Es imprescindible que el programa siga realizando el mismo algoritmo, por lo que solo se
+deberían realizar cambios en el programa que no cambien la salida.</p>
+<p>b. Explique por qué el orden no es el correcto en caso de cambiarlo.</p>
+</li>
+</ol>
+</blockquote>
+<p>Esta parte del enunciado se refiere a la siguiente parte del código: [En la función <code>float* gaussian_kernel(int ksize, double sigma)</code>]</p>
+<pre class="hljs"><code><div>for (i = 0; i &lt; ksize; i++) {
+    for (j = 0; j &lt; ksize; j++) {
+        gauss[i + ksize*j] /= sum;
+    }
+}
+</div></code></pre>
+<p>Que sustituimos por esto otro:</p>
+<pre class="hljs"><code><div>for (i = 0; i &lt; ksize; i++) {
+    for (j = 0; j &lt; ksize; j++) {
+        gauss[i*ksize + j] /= sum;
+    }
+}
+</div></code></pre>
+<p>Como podemos ver, pasamos de tener un acceso por saltos, a un acceso <em>semisecuencial</em>, pues el rango de la variable <strong><em>i</em></strong> varía en las iteraciones externas, y la <strong><em>j</em></strong> en las internas, por lo que es preferible acceder de seguido a las posiciones dadas por la variable con menos variaciones en los bucles interiores.</p>
+<p>Y también:</p>
+<pre class="hljs"><code><div>167         int r, g, b;
+168         for (int j = 0; j &lt; height; j++)
+169         {
+170             
+171             for (int i = 0; i &lt; width; i++)
+172             {
+173                 getRGB(rgb_image, width, height, 4, i, j, &amp;r, &amp;g, &amp;b);
+174                 grey_image[j * width + i] = (int)(0.2989 * r + 0.5870 * g + 0.1140 * b);
+175             }
+176         }
+</div></code></pre>
+<p>Ésta última es la final, que ha sufrido un cambio de bucle. Primero se ejecuta el bucle <strong><em>j</em></strong> y luego el bucle <strong><em>i</em></strong>.</p>
+<p>Lo mismo para:</p>
+<pre class="hljs"><code><div>182         // Sobel edge detection
+183 #define PIXEL_GREY(x, y) (grey_image[(x) + (y)*width])
+184         for (int j = 1; j &lt; height - 1; j++)
+185         {
+186             # pragma omp parallel for
+187             for (int i = 1; i &lt; width - 1; i++)
+188             {
+189                 int x = i - 1;
+190                 int y = j - 1;
+191                 float a = (PIXEL_GREY(i - 1, j - 1) + PIXEL_GREY(i - 1, j) * 2 + PIXEL_GREY(i - 1, j + 1) -
+192                            (PIXEL_GREY(i + 1, j - 1) + PIXEL_GREY(i + 1, j) * 2 + PIXEL_GREY(i + 1, j + 1)));
+193                 float b = (PIXEL_GREY(i - 1, j - 1) + PIXEL_GREY(i, j - 1) * 2 + PIXEL_GREY(i + 1, j - 1) -
+194                            (PIXEL_GREY(i - 1, j + 1) + PIXEL_GREY(i - 1, j + 1) * 2 + PIXEL_GREY(i - 1, j + 1)));
+195
+196                 edges[x + y * width_edges] = sqrt(a * a + b * b);
+197             }
+198         }
+</div></code></pre>
+<p>También aquí:</p>
+<pre class="hljs"><code><div>233         // More classic gaussian filter
+234         } else {
+235             printf(&quot;[info] Using gaussian denoising...\n&quot;);
+236             float* kernel = gaussian_kernel(2*radius+1, 1.0);
+237             double sum = 0;
+238             # pragma omp parallel for private(x, y) reduction(+:sum)
+239             for (int j = radius; j &lt; height_edges - radius; j++)
+240             {
+241                 for (int i = radius; i &lt; width_edges - radius; i++)
+242                 {
+243                     x = i - radius;
+244                     y = j - radius;
+245                     sum = 0;
+246                     for (int p2 = 0; p2 &lt;= 2 * radius; p2++)
+247                     {
+248                         for (int p1 = 0; p1 &lt;= 2 * radius; p1++)
+249                         {
+250                             if (kernel[p1+p2*(2*radius+1)]&gt;1) 
+251                                 printf(&quot;%f, %d, %d\n&quot;, kernel[p1+p2*(2*radius+1)], p1, p2);
+252                             sum += kernel[p1+p2*(2*radius+1)] * PIXEL_EDGES(i-radius+p1, j-radius+p2);
+253                         }
+254                     }
+255                     edges_denoised[x + y * width_denoised] = sum&gt;50?255:0;
+256                 }
+257             }
+258         }
+</div></code></pre>
+<p>En esta última además ha sido doble, primero intercambiamos el orden iterador de <strong><em>i</em></strong> y <strong><em>j</em></strong>, y luego de <strong><em>p1</em></strong> y <strong><em>p2</em></strong>.</p>
+<p>El programa sigue realizando el mismo algoritmo, puesto que sólo se ha cambiado el orden de acceso a una modificación de una matriz, pero cuyos valores serán comunes puesto que el factor de división siempre será el mismo.</p>
+<p>Se podría hacer también para el caso <code>MEDIAN</code>, pero como no lo usamos ni lo hemos modificado, ni lo haremos con los <code>pragma</code>.</p>
+<blockquote>
+<ol start="3">
+<li>
+<p>Obviando el Bucle 0, pruebe diferentes paralelizaciones con OpenMP comentando cuales deberían
+obtener mejor rendimiento.
+a. Es imprescindible que el programa siga realizando el mismo algoritmo, por lo que solo se
+deberían realizar cambios en el programa que no cambien la salida.</p>
+<p>b. No es necesaria la exploración completa de todas las posibles paralelizaciones, es necesario
+utilizar los conocimientos obtenidos en la práctica para acotar cuales serían las mejores
+soluciones. Los razonamientos que utilice deben ser incluidos en la memoria.</p>
+</li>
+</ol>
+</blockquote>
+<p>Hemos incluido diferentes directrices <code># pragma</code> en el fichero. Las comentamos a continuación:</p>
+<pre class="hljs"><code><div> 17 float* gaussian_kernel(int ksize, double sigma) {
+ 18     float* gauss = malloc(ksize*ksize*sizeof(float));
+ 19     double sum = 0;
+ 20     int i, j;
+ 21     
+ 22     for (j = 0; j &lt; ksize; j++) {
+ 23         #pragma omp parallel for reduction(+:sum)
+ 24         for (i = 0; i &lt; ksize; i++) {
+ 25             double x = i - (ksize - 1) / 2.0;
+ 26             double y = j - (ksize - 1) / 2.0;
+ 27             gauss[i + ksize*j] = (GAUSSIAN_K * exp(((pow(x, 2) + pow(y, 2)) / ((2 * pow(sigma, 2)))) * (-1)));
+ 28             sum += gauss[i + ksize*j];
+ 29         }
+ 30     }
+ 31
+ 32     for (i = 0; i &lt; ksize; i++) {
+ 33         #pragma omp parallel for
+ 34         for (j = 0; j &lt; ksize; j++) {
+ 35             gauss[i*ksize + j] /= sum;
+ 36         }
+ 37     }
+ 38
+ 39     return gauss;
+ 40 }
+</div></code></pre>
+<p>En este caso, en esta función, vemos que tenemos 2 directrices declaradas. La primera, se apoya en algoritmos de reducción paralela para reducir la suma <code>sum += gauss[i + ksize*j</code></p>
+<p>La segunda, paraleliza el bucle interno en la división. La cláusula <code>reduction</code> no admite la división, por lo que no podemos usarla aquí.</p>
+<p>Seguimos con la siguiente:</p>
+<pre class="hljs"><code><div>166         // RGB to grey scale
+167         int r, g, b;
+168         for (int i = 0; i &lt; width; i++)
+169         {
+170             # pragma omp parallel for default(shared) private(r, g, b)
+                  // rgb_image is initialized before
+171             for (int j = 0; j &lt; height; j++)
+172             {
+173                 getRGB(rgb_image, width, height, 4, i, j, &amp;r, &amp;g, &amp;b);
+174                 grey_image[j * width + i] = (int)(0.2989 * r + 0.5870 * g + 0.1140 * b);
+175             }
+176         }
+</div></code></pre>
+<p>Vemos que la directiva <code># pragma</code> está en el bucle interno, que se encarga de calcular el valor de grey_image, pone por defecto como compartidas a las que hubiese declaradas antes y como privadas r, g, b; estas últimas se modificarán concurrentemente por lo que evitará fallos debido a modificación de datos.</p>
+<p>Por último, hemos paralelizado ésta sección:</p>
+<pre class="hljs"><code><div>233         // More classic gaussian filter
+234         } else {
+235             printf(&quot;[info] Using gaussian denoising...\n&quot;);
+236             float* kernel = gaussian_kernel(2*radius+1, 1.0);
+237             double sum = 0;
+238             # pragma omp parallel for private(x, y) reduction(+:sum)
+239             for (int j = radius; j &lt; height_edges - radius; j++)
+240             {
+241                 for (int i = radius; i &lt; width_edges - radius; i++)
+242                 {
+243                     x = i - radius;
+244                     y = j - radius;
+245                     sum = 0;
+246                     for (int p2 = 0; p2 &lt;= 2 * radius; p2++)
+247                     {
+248                         for (int p1 = 0; p1 &lt;= 2 * radius; p1++)
+249                         {
+250                             if (kernel[p1+p2*(2*radius+1)]&gt;1) 
+251                                 printf(&quot;%f, %d, %d\n&quot;, kernel[p1+p2*(2*radius+1)], p1, p2);
+252                             sum += kernel[p1+p2*(2*radius+1)] * PIXEL_EDGES(i-radius+p1, j-radius+p2);
+253                         }
+254                     }
+255                     edges_denoised[x + y * width_denoised] = sum&gt;50?255:0;
+256                 }
+257             }
+258         }
+</div></code></pre>
+<p>Donde usamos <code># pragma omp parallel ...</code> para calcular la suma, utilizando <code>reduction</code>, por lo que evitamos que los <em>threads</em> tengan que serializarse, ahorrando así tiempo. Además, declaramos <strong><em>x</em></strong> e <strong><em>y</em></strong> como private ya que se van a estar modificando dentro de la región paralela. La razón de ponerlo en la parte externa del bucle es que conseguimos una paralelización de grano grueso, con menor sobrecarga, ya que de la otra manera tiende a volverse excesivamente lento.</p>
+<blockquote>
+<ol start="4">
+<li>Rellene una tabla con resultados de tiempos y speedup respecto a la versión serie para imágenes de
+distintas resoluciones (SD, HD, FHD, UHD-4k, UHD-8k). Añada a su vez una columna que sea la tasa de
+fps a la que procesaría el programa</li>
+</ol>
+</blockquote>
+<p>Nota: dentro de modificaciones incluimos también los cambios en las iteraciones de los bucles, que garantizan un uso más eficiente a la memoria.</p>
+<table>
+<thead>
+<tr>
+<th>Resolución</th>
+<th>Sin modificaciones</th>
+<th>FPS</th>
+<th>Con modificaciones</th>
+<th>FPS</th>
+<th>Acc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SD</td>
+<td>Using gaussian denoising...</td>
+<td></td>
+<td>Using gaussian denoising...</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Tiempo: 0.079618</td>
+<td>14.3</td>
+<td>Tiempo: 0.028650</td>
+<td>34.9</td>
+<td>2.78</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>HD</td>
+<td>Using gaussian denoising...</td>
+<td></td>
+<td>Using gaussian denoising...</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Tiempo: 0.324600</td>
+<td>3.1</td>
+<td>Tiempo: 0.107033</td>
+<td>9.11</td>
+<td>3.03</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>FHD</td>
+<td>Using gaussian denoising...</td>
+<td></td>
+<td>Using gaussian denoising...</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Tiempo: 0.737149</td>
+<td>1.36</td>
+<td>Tiempo: 0.240592</td>
+<td>4.15</td>
+<td>3.06</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>4K</td>
+<td>Using gaussian denoising...</td>
+<td></td>
+<td>Using gaussian denoising...</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Tiempo: 3.891408</td>
+<td>0.26</td>
+<td>Tiempo: 0.946177</td>
+<td>1.06</td>
+<td>4.11</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>8K</td>
+<td>Using gaussian denoising...</td>
+<td></td>
+<td>Using gaussian denoising...</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Tiempo: 13.922054</td>
+<td>0.72</td>
+<td>Tiempo: 3.773861</td>
+<td>0.26</td>
+<td>3.69</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Observamos que la versión con modificaciones es bastante mejor que la versión de serie, ya que hace acopio de lo estudiado sobre el acceso a matrices y vectores, así como <em>OpenMP</em>.</p>
+
+</body>
+</html>

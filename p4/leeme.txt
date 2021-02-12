@@ -1,0 +1,3 @@
+Los ficheros de cada ejercicio están en su directorio correspondiente.
+
+La memoria contiene las respuestas solicitadas ordenadas por apartado. Se encuentra en formato html para abrir desde un navegador, y en PDF.
